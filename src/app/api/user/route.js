@@ -132,10 +132,13 @@ export async function DELETE(request) {
 
     await prisma.user.delete({ where: { id: idInt } });
 
-    return new Response(JSON.stringify({ message: "User deleted successfully" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ message: "User deleted successfully" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     console.error(error);
     return new Response(JSON.stringify({ error: "Failed to delete user" }), {
