@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { compare } from "bcryptjs";
 
 export async function POST(request) {
   try {
@@ -20,7 +21,9 @@ export async function POST(request) {
     if (!user)
       return NextResponse.json({ error: "User not found" }, { status: 401 });
 
-    if (user.password !== password)
+    const passwordIsValid = await compare(password, user.password);
+
+    if (!passwordIsValid)
       return NextResponse.json(
         { error: "Incorrect password" },
         { status: 401 }
