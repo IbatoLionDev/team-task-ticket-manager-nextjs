@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { hash } from "bcryptjs";
 
 export async function GET() {
   try {
@@ -22,7 +23,7 @@ export async function POST(request) {
     const { firstName, username, lastName, email, password, phoneNumber } =
       body;
 
-    if (!firstName || !username || !lastName || !email || !password) {
+    if (!firstName || !username || !lastName || !email || !password)
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
@@ -30,10 +31,18 @@ export async function POST(request) {
           headers: { "Content-Type": "application/json" },
         }
       );
-    }
+
+    const hashedPassword = await hash(password, 10); // hash password before saving
 
     const newUser = await prisma.user.create({
-      data: { firstName, username, lastName, email, password, phoneNumber },
+      data: {
+        firstName,
+        username,
+        lastName,
+        email,
+        password: hashedPassword,
+        phoneNumber,
+      },
     });
 
     return new Response(JSON.stringify(newUser), {
@@ -55,16 +64,22 @@ export async function PUT(request) {
     const { id, firstName, username, lastName, email, password, phoneNumber } =
       body;
 
-    if (!id) {
+    if (!id)
       return new Response(JSON.stringify({ error: "Missing user id" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
-    }
 
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: { firstName, username, lastName, email, password, phoneNumber },
+      data: {
+        firstName,
+        username,
+        lastName,
+        email,
+        password: password ? await hash(password, 10) : undefined, // conditionally hash updated password
+        phoneNumber,
+      },
     });
 
     return new Response(JSON.stringify(updatedUser), {
@@ -85,16 +100,20 @@ export async function PATCH(request) {
     const body = await request.json();
     const { id, ...data } = body;
 
-    if (!id) {
+    if (!id)
       return new Response(JSON.stringify({ error: "Missing user id" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
-    }
+
+    const dataToUpdate = {
+      ...data,
+      password: data.password ? await hash(data.password, 10) : undefined, // apply hash on partial password update
+    };
 
     const updatedUser = await prisma.user.update({
       where: { id },
-      data,
+      data: dataToUpdate,
     });
 
     return new Response(JSON.stringify(updatedUser), {
@@ -115,20 +134,18 @@ export async function DELETE(request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
-    if (!id) {
+    if (!id)
       return new Response(JSON.stringify({ error: "Missing user id" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
-    }
 
     const idInt = parseInt(id, 10);
-    if (isNaN(idInt)) {
+    if (isNaN(idInt))
       return new Response(JSON.stringify({ error: "Invalid user id" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
-    }
 
     await prisma.user.delete({ where: { id: idInt } });
 
