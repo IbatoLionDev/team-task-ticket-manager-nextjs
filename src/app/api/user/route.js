@@ -1,35 +1,29 @@
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const users = await prisma.user.findMany();
-    return new Response(JSON.stringify(users), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(users, { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Failed to fetch users" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request) {
   try {
-    const body = await request.json();
     const { firstName, username, lastName, email, password, phoneNumber } =
-      body;
+      await request.json();
 
     if (!firstName || !username || !lastName || !email || !password)
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
       );
 
     const hashedPassword = await hash(password, 10); // hash password before saving
@@ -45,30 +39,23 @@ export async function POST(request) {
       },
     });
 
-    return new Response(JSON.stringify(newUser), {
-      status: 201,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Failed to create user" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "Failed to create user" },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(request) {
   try {
-    const body = await request.json();
     const { id, firstName, username, lastName, email, password, phoneNumber } =
-      body;
+      await request.json();
 
     if (!id)
-      return new Response(JSON.stringify({ error: "Missing user id" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -82,29 +69,22 @@ export async function PUT(request) {
       },
     });
 
-    return new Response(JSON.stringify(updatedUser), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Failed to update user" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "Failed to update user" },
+      { status: 500 }
+    );
   }
 }
 
 export async function PATCH(request) {
   try {
-    const body = await request.json();
-    const { id, ...data } = body;
+    const { id, ...data } = await request.json();
 
     if (!id)
-      return new Response(JSON.stringify({ error: "Missing user id" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
     const dataToUpdate = {
       ...data,
@@ -116,16 +96,13 @@ export async function PATCH(request) {
       data: dataToUpdate,
     });
 
-    return new Response(JSON.stringify(updatedUser), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Failed to patch user" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "Failed to patch user" },
+      { status: 500 }
+    );
   }
 }
 
@@ -135,32 +112,23 @@ export async function DELETE(request) {
     const id = searchParams.get("id");
 
     if (!id)
-      return new Response(JSON.stringify({ error: "Missing user id" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
     const idInt = parseInt(id, 10);
     if (isNaN(idInt))
-      return new Response(JSON.stringify({ error: "Invalid user id" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
 
     await prisma.user.delete({ where: { id: idInt } });
 
-    return new Response(
-      JSON.stringify({ message: "User deleted successfully" }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
+    return NextResponse.json(
+      { message: "User deleted successfully" },
+      { status: 200 }
     );
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Failed to delete user" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "Failed to delete user" },
+      { status: 500 }
+    );
   }
 }
