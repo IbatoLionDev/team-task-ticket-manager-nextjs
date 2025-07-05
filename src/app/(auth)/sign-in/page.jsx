@@ -12,18 +12,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useLogin } from "@/hooks/useLogin";
+import { useClientForm } from "@/hooks/useClientForm";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const {
-    identifier,
-    setIdentifier,
-    password,
-    setPassword,
-    loading,
-    error,
-    handleSubmit,
-  } = useLogin();
+  const router = useRouter();
+  const { fields, handleChange, handleSubmit, error, loading } = useClientForm({
+    url: `${process.env.NEXT_PUBLIC_API_BASE}/login`,
+    onSuccess: () => router.push("/dashboard"),
+  });
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -47,8 +44,8 @@ export default function LoginPage() {
                 name="identifier"
                 type="text"
                 placeholder="you@example.com"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                value={fields.identifier || ""}
+                onChange={(e) => handleChange("identifier", e.target.value)}
                 required
               />
             </div>
@@ -60,8 +57,8 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={fields.password || ""}
+                onChange={(e) => handleChange("password", e.target.value)}
                 required
               />
             </div>
