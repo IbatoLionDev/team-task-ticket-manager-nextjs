@@ -14,11 +14,12 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useClientForm } from "@/hooks/useClientForm";
 import { useRouter } from "next/navigation";
+import { API_BASE } from "@/lib/environments";
 
 export default function LoginPage() {
   const router = useRouter();
   const { fields, handleChange, handleSubmit, error, loading } = useClientForm({
-    url: `${process.env.NEXT_PUBLIC_API_BASE}/login`,
+    url: `${API_BASE}/login`,
     onSuccess: () => router.push("/dashboard"),
   });
 
