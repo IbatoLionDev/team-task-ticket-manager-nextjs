@@ -1,7 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+// lib/prisma.js
 
-const globalForPrisma = global;
+import { PrismaClient } from "@/generated/prisma";
 
-export const prisma = globalForPrisma.prisma || new PrismaClient();
+const globalForPrisma = globalThis;
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+const prisma = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
+
+export { prisma };

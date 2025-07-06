@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import "../globals.css";
+import "./globals.css";
 
 export const metadata = {
   title: "Create Next App",
