@@ -1,4 +1,3 @@
-// src/app/(auth)/sign-up/page.jsx
 "use client";
 
 import {
@@ -14,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { signUpAction } from "./action";
+import Link from "next/link";
 
 export default function SignUpPage() {
   return (
@@ -25,9 +25,9 @@ export default function SignUpPage() {
             Fill in the fields below to register
           </CardDescription>
           <CardAction>
-            <a href="/auth/sign-in">
-              <Button variant="link">Already have an account?</Button>
-            </a>
+            <Button variant="link" asChild>
+              <Link href="/sign-in">Already have an account?</Link>
+            </Button>
           </CardAction>
         </CardHeader>
 

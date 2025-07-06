@@ -2,29 +2,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { API_BASE } from "@/lib/environments"; // importamos la constante
+import { API_BASE } from "@/lib/environments";
 
 export async function signUpAction(formData) {
-  // 1. Extraer valores
   const firstName = formData.get("firstName")?.toString().trim();
   const lastName = formData.get("lastName")?.toString().trim();
   const username = formData.get("username")?.toString().trim();
   const email = formData.get("email")?.toString().trim().toLowerCase();
   const password = formData.get("password")?.toString();
 
-  // 2. Loguear después del get
-  console.log("firstName:", firstName);
-  console.log("lastName: ", lastName);
-  console.log("username: ", username);
-  console.log("email:    ", email);
-  console.log("password: ", password);
-
-  // 3. Validar
-  if (!firstName || !lastName || !username || !email || !password) {
+  if (!firstName || !lastName || !username || !email || !password)
     throw new Error("All fields are required");
-  }
 
-  // 4. Llamada a la API interna usando la constante API_BASE
   const res = await fetch(`${API_BASE}/user`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -37,6 +26,5 @@ export async function signUpAction(formData) {
     throw new Error(err.error || "Failed to create user");
   }
 
-  // 5. Redirigir al sign-in
   redirect("/sign-in");
 }

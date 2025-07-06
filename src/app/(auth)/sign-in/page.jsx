@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useClientForm } from "@/hooks/useClientForm";
 import { useRouter } from "next/navigation";
 import { API_BASE } from "@/lib/environments";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,7 +33,9 @@ export default function LoginPage() {
             Enter your username or email below to login
           </CardDescription>
           <CardAction>
-            <Button variant="link">Sign Up</Button>
+            <Button variant="link" asChild>
+              <Link href="/sign-up">Sign Up</Link>
+            </Button>
           </CardAction>
         </CardHeader>
 
