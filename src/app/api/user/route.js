@@ -4,7 +4,19 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        username: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        createdAt: true,
+        updatedAt: true,
+        tasks: true,
+      },
+    });
     return NextResponse.json(users, { status: 200 });
   } catch (error) {
     console.error(error);
@@ -37,6 +49,17 @@ export async function POST(request) {
         password: hashedPassword,
         phoneNumber,
       },
+      select: {
+        id: true,
+        firstName: true,
+        username: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        createdAt: true,
+        updatedAt: true,
+        tasks: true,
+      },
     });
 
     return NextResponse.json(newUser, { status: 201 });
@@ -57,15 +80,32 @@ export async function PUT(request) {
     if (!id)
       return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
+    const idInt = typeof id === "string" ? parseInt(id, 10) : id;
+    if (isNaN(idInt))
+      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+
+    const dataToUpdate = {
+      firstName,
+      username,
+      lastName,
+      email,
+      phoneNumber,
+    };
+    if (password) dataToUpdate.password = await hash(password, 10);
+
     const updatedUser = await prisma.user.update({
-      where: { id },
-      data: {
-        firstName,
-        username,
-        lastName,
-        email,
-        password: password ? await hash(password, 10) : undefined, // conditionally hash updated password
-        phoneNumber,
+      where: { id: idInt },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        firstName: true,
+        username: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        createdAt: true,
+        updatedAt: true,
+        tasks: true,
       },
     });
 
@@ -86,14 +126,27 @@ export async function PATCH(request) {
     if (!id)
       return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
-    const dataToUpdate = {
-      ...data,
-      password: data.password ? await hash(data.password, 10) : undefined, // apply hash on partial password update
-    };
+    const idInt = typeof id === "string" ? parseInt(id, 10) : id;
+    if (isNaN(idInt))
+      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+
+    if (data.password) data.password = await hash(data.password, 10);
+    else delete data.password;
 
     const updatedUser = await prisma.user.update({
-      where: { id },
-      data: dataToUpdate,
+      where: { id: idInt },
+      data,
+      select: {
+        id: true,
+        firstName: true,
+        username: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        createdAt: true,
+        updatedAt: true,
+        tasks: true,
+      },
     });
 
     return NextResponse.json(updatedUser, { status: 200 });
@@ -114,7 +167,7 @@ export async function DELETE(request) {
     if (!id)
       return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
-    const idInt = parseInt(id, 10);
+    const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
       return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
 
