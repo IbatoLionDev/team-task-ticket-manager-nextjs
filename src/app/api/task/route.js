@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 // GET all tasks
-export async function GET(request) {
+export async function GET() {
   try {
     const tasks = await prisma.task.findMany({
       include: {
