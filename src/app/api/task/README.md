@@ -6,11 +6,18 @@ This API provides RESTful endpoints to manage tasks in the system.
 
 ### GET /api/task
 
-Returns a list of all tasks.
+Returns a list of all tasks. You can filter the fields returned by passing query parameters with the field names. You can also limit the number of results with the `index` query param.
 
-**Response:**
+**Query Parameters:**
 
-- 200: Array of task objects (with project, user, and subtasks)
+- Any field name (e.g. `title`, `urgency`, etc.) — if present, only those fields will be returned for each task.
+- `index` (optional): number — limits the number of tasks returned.
+
+**Examples:**
+
+- `/api/task?title&urgency` returns only the title and urgency fields for all tasks.
+- `/api/task?index=5` returns the first 5 tasks with all fields.
+- `/api/task` returns all tasks with all fields.
 
 ### GET /api/task/[id]
 
@@ -18,11 +25,12 @@ Returns a single task by its ID.
 
 **Params:**
 
-- `id` (int, required): Task ID
+- `id` (int, required): Task ID (as part of the URL)
 
 **Response:**
 
 - 200: Task object (with project, user, and subtasks)
+- 400: Invalid task id
 - 404: Task not found
 
 ### POST /api/task
@@ -99,6 +107,9 @@ Deletes a task by its ID.
 
 ## Notes
 
+- If no query params are provided, all fields are returned.
+- If query params are provided, only those fields are returned.
+- The `index` param limits the number of results.
 - All dates must be in ISO 8601 format.
 - The `subTasks` field is an array of subtask objects to be created with the task (optional).
 - Returns related project, user, and subtasks in all responses.

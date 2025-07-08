@@ -6,11 +6,18 @@ This API provides RESTful endpoints to manage projects in the system.
 
 ### GET /api/project
 
-Returns a list of all projects.
+Returns a list of all projects. You can filter the fields returned by passing query parameters with the field names. You can also limit the number of results with the `index` query param.
 
-**Response:**
+**Query Parameters:**
 
-- 200: Array of project objects (with their tasks)
+- Any field name (e.g. `title`, `owner`, etc.) — if present, only those fields will be returned for each project.
+- `index` (optional): number — limits the number of projects returned.
+
+**Examples:**
+
+- `/api/project?title&owner` returns only the title and owner fields for all projects.
+- `/api/project?index=5` returns the first 5 projects with all fields.
+- `/api/project` returns all projects with all fields.
 
 ### GET /api/project/[id]
 
@@ -18,11 +25,12 @@ Returns a single project by its ID.
 
 **Params:**
 
-- `id` (int, required): Project ID
+- `id` (int, required): Project ID (as part of the URL)
 
 **Response:**
 
 - 200: Project object (with its tasks)
+- 400: Invalid project id
 - 404: Project not found
 
 ### POST /api/project
@@ -99,6 +107,9 @@ Deletes a project by its ID.
 
 ## Notes
 
+- If no query params are provided, all fields are returned.
+- If query params are provided, only those fields are returned.
+- The `index` param limits the number of results.
 - All dates must be in ISO 8601 format.
 - The `tasks` field is an array of task objects to be created with the project (optional).
 - Returns related tasks in all responses.

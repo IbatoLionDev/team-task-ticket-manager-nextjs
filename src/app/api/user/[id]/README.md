@@ -1,6 +1,6 @@
 # User Dynamic Route API
 
-This API provides an endpoint to fetch a single user by their ID.
+This API provides an endpoint to fetch a single user by their ID. You can filter the fields returned by passing query parameters with the field names.
 
 ## Endpoint
 
@@ -12,9 +12,18 @@ Returns a single user by their ID.
 
 - `id` (int, required): User ID (as part of the URL)
 
+**Query Parameters:**
+
+- Any field name (e.g. `email`, `username`, etc.) — if present, only those fields will be returned for the user.
+
+**Examples:**
+
+- `/api/user/1?email&username` returns only the email and username fields for the user with id 1.
+- `/api/user/1` returns all fields for the user with id 1.
+
 **Response:**
 
-- 200: User object (with their tasks)
+- 200: User object (with their tasks if requested)
 - 400: Invalid user id
 - 404: User not found
 

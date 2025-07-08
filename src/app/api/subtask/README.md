@@ -6,11 +6,18 @@ This API provides RESTful endpoints to manage subtasks in the system.
 
 ### GET /api/subtask
 
-Returns a list of all subtasks.
+Returns a list of all subtasks. You can filter the fields returned by passing query parameters with the field names. You can also limit the number of results with the `index` query param.
 
-**Response:**
+**Query Parameters:**
 
-- 200: Array of subtask objects (with their parent task)
+- Any field name (e.g. `title`, `isDone`, etc.) — if present, only those fields will be returned for each subtask.
+- `index` (optional): number — limits the number of subtasks returned.
+
+**Examples:**
+
+- `/api/subtask?title&isDone` returns only the title and isDone fields for all subtasks.
+- `/api/subtask?index=5` returns the first 5 subtasks with all fields.
+- `/api/subtask` returns all subtasks with all fields.
 
 ### GET /api/subtask/[id]
 
@@ -18,11 +25,12 @@ Returns a single subtask by its ID.
 
 **Params:**
 
-- `id` (int, required): Subtask ID
+- `id` (int, required): Subtask ID (as part of the URL)
 
 **Response:**
 
 - 200: Subtask object (with its parent task)
+- 400: Invalid subtask id
 - 404: Subtask not found
 
 ### POST /api/subtask
@@ -95,5 +103,7 @@ Deletes a subtask by its ID.
 
 ## Notes
 
-- All dates must be in ISO 8601 format.
+- If no query params are provided, all fields are returned.
+- If query params are provided, only those fields are returned.
+- The `index` param limits the number of results.
 - Returns related task in all responses.

@@ -2,12 +2,42 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 // GET all subtasks
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const allFields = [
+      "id",
+      "taskId",
+      "task",
+      "title",
+      "description",
+      "isDone",
+      "createdAt",
+      "updatedAt",
+      "finishedAt",
+    ];
+    let select = {};
+    let limit;
+    let hasQueryParams = false;
+    for (const fieldName of allFields) {
+      if (searchParams.has(fieldName)) {
+        select[fieldName] = true;
+        hasQueryParams = true;
+      }
+    }
+    if (searchParams.has("index")) {
+      const indexValue = parseInt(searchParams.get("index"), 10);
+      if (!isNaN(indexValue) && indexValue > 0) limit = indexValue;
+    }
+    if (!hasQueryParams) {
+      select = allFields.reduce((accumulator, fieldName) => {
+        accumulator[fieldName] = true;
+        return accumulator;
+      }, {});
+    }
     const subtasks = await prisma.subtask.findMany({
-      include: {
-        task: true,
-      },
+      select,
+      ...(limit ? { take: limit } : {}),
     });
     return NextResponse.json(subtasks, { status: 200 });
   } catch (error) {

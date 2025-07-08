@@ -2,20 +2,42 @@ import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const allFields = [
+      "id",
+      "firstName",
+      "username",
+      "lastName",
+      "email",
+      "phoneNumber",
+      "createdAt",
+      "updatedAt",
+      "tasks",
+    ];
+    let select = {};
+    let limit;
+    let hasQueryParams = false;
+    for (const fieldName of allFields) {
+      if (searchParams.has(fieldName)) {
+        select[fieldName] = true;
+        hasQueryParams = true;
+      }
+    }
+    if (searchParams.has("index")) {
+      const indexValue = parseInt(searchParams.get("index"), 10);
+      if (!isNaN(indexValue) && indexValue > 0) limit = indexValue;
+    }
+    if (!hasQueryParams) {
+      select = allFields.reduce((accumulator, fieldName) => {
+        accumulator[fieldName] = true;
+        return accumulator;
+      }, {});
+    }
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
-        tasks: true,
-      },
+      select,
+      ...(limit ? { take: limit } : {}),
     });
     return NextResponse.json(users, { status: 200 });
   } catch (error) {
