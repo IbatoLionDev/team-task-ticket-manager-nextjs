@@ -6,26 +6,35 @@ This API provides RESTful endpoints to manage subtasks in the system.
 
 ### GET /api/subtask
 
-Returns a list of all subtasks. You can filter the fields returned by passing query parameters with the field names. You can also limit the number of results with the `index` query param.
+Returns a list of subtasks. You can filter the fields returned by passing query parameters with the field names. Si usas los parámetros `page` o `pageSize`, la respuesta será paginada; si no, se devuelven todos los subtasks.
 
 **Query Parameters:**
 
 - Any field name (e.g. `title`, `isDone`, etc.) — if present, only those fields will be returned for each subtask.
-- `index` (optional): number — limits the number of subtasks returned.
+- `page` (optional): number — page number (pagination only if present)
+- `pageSize` (optional): number — number of subtasks per page (pagination only if present)
 
 **Examples:**
 
-- `/api/subtask?title&isDone` returns only the title and isDone fields for all subtasks.
-- `/api/subtask?index=5` returns the first 5 subtasks with all fields.
-- `/api/subtask` returns all subtasks with all fields.
+- `/api/subtask?title&isDone&page=2&pageSize=5` returns only the title and isDone fields for subtasks on page 2, 5 per page.
+- `/api/subtask?page=1&pageSize=20` returns the first 20 subtasks with all fields.
+- `/api/subtask` returns all subtasks with all fields (no pagination).
+
+- **Response:**
+  - Status: 200 OK
+  - Body: JSON array of subtask objects (or paginated object if paginación activa)
 
 ### GET /api/subtask/[id]
 
-Returns a single subtask by its ID.
+Returns a single subtask by its ID. You can filter the fields returned by passing query parameters with the field names.
 
 **Params:**
 
 - `id` (int, required): Subtask ID (as part of the URL)
+
+**Query Parameters:**
+
+- Any field name (e.g. `title`, `isDone`, etc.) — if present, only those fields will be returned for the subtask.
 
 **Response:**
 
@@ -105,5 +114,5 @@ Deletes a subtask by its ID.
 
 - If no query params are provided, all fields are returned.
 - If query params are provided, only those fields are returned.
-- The `index` param limits the number of results.
+- Pagination is only applied if `page` or `pageSize` is present.
 - Returns related task in all responses.

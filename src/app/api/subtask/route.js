@@ -17,7 +17,6 @@ export async function GET(request) {
       "finishedAt",
     ];
     let select = {};
-    let limit;
     let hasQueryParams = false;
     for (const fieldName of allFields) {
       if (searchParams.has(fieldName)) {
@@ -25,19 +24,28 @@ export async function GET(request) {
         hasQueryParams = true;
       }
     }
-    if (searchParams.has("index")) {
-      const indexValue = parseInt(searchParams.get("index"), 10);
-      if (!isNaN(indexValue) && indexValue > 0) limit = indexValue;
-    }
     if (!hasQueryParams) {
       select = allFields.reduce((accumulator, fieldName) => {
         accumulator[fieldName] = true;
         return accumulator;
       }, {});
     }
+    // Pagination logic: only apply if page or pageSize is present
+    let skip, take;
+    const hasPage = searchParams.has("page");
+    const hasPageSize = searchParams.has("pageSize");
+    if (hasPage || hasPageSize) {
+      const page = parseInt(searchParams.get("page"), 10) || 1;
+      const pageSize = parseInt(searchParams.get("pageSize"), 10) || 10;
+      if (page > 0 && pageSize > 0) {
+        skip = (page - 1) * pageSize;
+        take = pageSize;
+      }
+    }
     const subtasks = await prisma.subtask.findMany({
       select,
-      ...(limit ? { take: limit } : {}),
+      ...(typeof skip !== "undefined" ? { skip } : {}),
+      ...(typeof take !== "undefined" ? { take } : {}),
     });
     return NextResponse.json(subtasks, { status: 200 });
   } catch (error) {

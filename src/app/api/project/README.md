@@ -6,26 +6,35 @@ This API provides RESTful endpoints to manage projects in the system.
 
 ### GET /api/project
 
-Returns a list of all projects. You can filter the fields returned by passing query parameters with the field names. You can also limit the number of results with the `index` query param.
+Returns a list of projects. You can filter the fields returned by passing query parameters with the field names. If you use the `page` or `pageSize` parameters, the response will be paginated; otherwise, all projects are returned.
 
 **Query Parameters:**
 
 - Any field name (e.g. `title`, `owner`, etc.) — if present, only those fields will be returned for each project.
-- `index` (optional): number — limits the number of projects returned.
+- `page` (optional): number — page number (pagination only if present)
+- `pageSize` (optional): number — number of projects per page (pagination only if present)
 
 **Examples:**
 
-- `/api/project?title&owner` returns only the title and owner fields for all projects.
-- `/api/project?index=5` returns the first 5 projects with all fields.
-- `/api/project` returns all projects with all fields.
+- `/api/project?title&owner&page=2&pageSize=5` returns only the title and owner fields for projects on page 2, 5 per page.
+- `/api/project?page=1&pageSize=20` returns the first 20 projects with all fields.
+- `/api/project` returns all projects with all fields (no pagination).
+
+- **Response:**
+  - Status: 200 OK
+  - Body: JSON array of project objects (or paginated object if pagination is active)
 
 ### GET /api/project/[id]
 
-Returns a single project by its ID.
+Returns a single project by its ID. You can filter the fields returned by passing query parameters with the field names.
 
 **Params:**
 
 - `id` (int, required): Project ID (as part of the URL)
+
+**Query Parameters:**
+
+- Any field name (e.g. `title`, `owner`, etc.) — if present, only those fields will be returned for the project.
 
 **Response:**
 
@@ -109,7 +118,7 @@ Deletes a project by its ID.
 
 - If no query params are provided, all fields are returned.
 - If query params are provided, only those fields are returned.
-- The `index` param limits the number of results.
+- Pagination is only applied if `page` or `pageSize` is present.
 - All dates must be in ISO 8601 format.
 - The `tasks` field is an array of task objects to be created with the project (optional).
 - Returns related tasks in all responses.
