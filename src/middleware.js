@@ -4,9 +4,7 @@ import { jwtVerify } from "jose";
 export async function middleware(request) {
   const token = request.cookies.get("token")?.value;
 
-  if (!token) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
-  }
+  if (!token) return NextResponse.redirect(new URL("/sign-in", request.url));
 
   try {
     await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));

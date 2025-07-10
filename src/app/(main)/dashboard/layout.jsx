@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import PropTypes from "prop-types";
 import { DashboardBreadcrumbs } from "@/components/ui/dashboard-breadcrumbs";
