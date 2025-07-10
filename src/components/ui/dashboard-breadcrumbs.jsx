@@ -1,0 +1,54 @@
+"use client";
+import { usePathname } from "next/navigation";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import React from "react";
+
+function getDashboardBreadcrumbs(pathname) {
+  const segments = pathname
+    .replace(/(^\/+)|(\/+$)/g, "")
+    .split("/")
+    .filter(Boolean);
+  const dashboardIndex = segments.indexOf("dashboard");
+  const crumbs =
+    dashboardIndex >= 0 ? segments.slice(dashboardIndex) : segments;
+  return crumbs.map((segment, idx) => {
+    const href = "/" + segments.slice(0, dashboardIndex + idx + 1).join("/");
+    const isLast = idx === crumbs.length - 1;
+    return {
+      key: href,
+      label: segment.charAt(0).toUpperCase() + segment.slice(1),
+      href,
+      isLast,
+    };
+  });
+}
+
+export function DashboardBreadcrumbs() {
+  const pathname = usePathname();
+  const crumbs = getDashboardBreadcrumbs(pathname);
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        {crumbs.map(({ key, label, href, isLast }) => (
+          <React.Fragment key={key}>
+            <BreadcrumbItem className={isLast ? undefined : "hidden md:block"}>
+              {isLast ? (
+                <BreadcrumbPage>{label}</BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+              )}
+            </BreadcrumbItem>
+            {!isLast && <BreadcrumbSeparator className="hidden md:block" />}
+          </React.Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
