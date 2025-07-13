@@ -11,19 +11,18 @@ export function useApiToken(apiUrl, token) {
           ? { Authorization: `Bearer ${token}` }
           : undefined;
         const res = await fetch(apiUrl, { headers });
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
-        } else {
+        if (res.ok === false) {
           setData(null);
+          return;
         }
+        const json = await res.json();
+        setData(json);
       } catch {
         setData(null);
       }
     }
-    if (apiUrl) {
-      fetchData();
-    }
+    if (!apiUrl) return;
+    fetchData();
   }, [apiUrl, token]);
 
   return data;
