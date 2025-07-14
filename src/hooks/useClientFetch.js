@@ -1,33 +1,48 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-export function useClientFetch({ url, method = "GET", onSuccess }) {
+export function useClientFetch(url, onSuccess, method = "GET") {
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const execute = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await fetch(url, {
-        method,
-        credentials: "include",
-      });
-      if (response.ok === false) {
-        const errorText = await response.text();
-        setError(errorText || "Fetch failed");
-        setLoading(false);
-        return;
-      }
-      const data = await response.json();
-      if (typeof onSuccess === "function") onSuccess(data);
-    } catch (err) {
-      setError(err.message || "Fetch error");
-    } finally {
-      setLoading(false);
-    }
-  }, [url, method, onSuccess]);
+  useEffect(() => {
+    if (!url) return;
 
-  return { execute, loading, error };
+    let isMounted = true;
+    const fetchData = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await fetch(url, {
+          method,
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          if (isMounted) setError(errorText || "Fetch failed");
+          setLoading(false);
+          return;
+        }
+        const jsonData = await response.json();
+        if (isMounted) {
+          setData(jsonData);
+          if (onSuccess) onSuccess(jsonData);
+        }
+      } catch (err) {
+        if (isMounted) setError(err.message || "Fetch error");
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [url, method]);
+
+  return { data, loading, error };
 }
