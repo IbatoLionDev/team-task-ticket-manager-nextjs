@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import React from "react";
+import Link from "next/link";
 
 function getDashboardBreadcrumbs(pathname) {
   const segments = pathname
@@ -42,7 +43,9 @@ export function DashboardBreadcrumbs() {
               {isLast ? (
                 <BreadcrumbPage>{label}</BreadcrumbPage>
               ) : (
-                <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href={href}>{label}</Link>
+                </BreadcrumbLink>
               )}
             </BreadcrumbItem>
             {!isLast && <BreadcrumbSeparator className="hidden md:block" />}
