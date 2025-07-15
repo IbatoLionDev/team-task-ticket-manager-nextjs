@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
-import {
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useClientFetch } from "@/hooks/useClientFetch";
 
 export function ProjectDelete({ projectId, onDeleteSuccess }) {
@@ -12,19 +10,17 @@ export function ProjectDelete({ projectId, onDeleteSuccess }) {
 
   const { data, loading, error } = useClientFetch(
     triggerDelete ? `/api/project?id=${projectId}` : null,
-    () => {
-      if (typeof onDeleteSuccess === "function") {
-        onDeleteSuccess(projectId);
-      }
-    },
     "DELETE"
   );
 
   useEffect(() => {
     if (data) {
       setTriggerDelete(false);
+      if (typeof onDeleteSuccess === "function") {
+        onDeleteSuccess(projectId);
+      }
     }
-  }, [data]);
+  }, [data, onDeleteSuccess, projectId]);
 
   const handleDelete = () => {
     if (!loading) {

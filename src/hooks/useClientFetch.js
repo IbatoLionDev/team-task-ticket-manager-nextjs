@@ -1,48 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-export function useClientFetch(url, onSuccess, method = "GET") {
+export function useClientFetch(url, method = "GET", options = {}) {
+  const { onSuccess } = options;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!url) return;
-
-    let isMounted = true;
-    const fetchData = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const response = await fetch(url, {
-          method,
-          credentials: "include",
-        });
-        if (!response.ok) {
-          const errorText = await response.text();
-          if (isMounted) setError(errorText || "Fetch failed");
-          setLoading(false);
-          return;
-        }
-        const jsonData = await response.json();
-        if (isMounted) {
-          setData(jsonData);
-          if (onSuccess) onSuccess(jsonData);
-        }
-      } catch (err) {
-        if (isMounted) setError(err.message || "Fetch error");
-      } finally {
-        if (isMounted) setLoading(false);
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(url, {
+        method,
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        setError(errorText || "Fetch failed");
+        return;
       }
-    };
+      const jsonData = await response.json();
+      setData(jsonData);
+      if (typeof onSuccess === "function") {
+        onSuccess(jsonData);
+      }
+    } catch (err) {
+      setError(err.message || "Fetch error");
+    } finally {
+      setLoading(false);
+    }
+  }, [url, method, onSuccess]);
 
+  useEffect(() => {
     fetchData();
+  }, [fetchData]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [url, method]);
-
-  return { data, loading, error };
+  return { data, loading, error, refetch: fetchData };
 }

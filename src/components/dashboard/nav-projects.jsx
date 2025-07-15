@@ -26,23 +26,12 @@ import { ProjectDelete } from "./project-delete";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
-  const [projects, setProjects] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const fetchProjectsSuccess = (data) => {
-    setProjects(data);
-  };
-
-  const { loading: fetchLoading, error: fetchError } = useClientFetch(
-    "/api/project",
-    fetchProjectsSuccess,
-    "GET"
-  );
-
-  // Sync loading and error states
-  if (loading !== fetchLoading) setLoading(fetchLoading);
-  if (error !== fetchError) setError(fetchError);
+  const {
+    data: projects,
+    loading,
+    error,
+    refetch,
+  } = useClientFetch("/api/project", "GET");
 
   const displayedProjects = projects ? projects.slice(0, 5) : [];
 
@@ -87,7 +76,7 @@ export function NavProjects() {
                   <ProjectDelete
                     projectId={item.id}
                     onDeleteSuccess={() => {
-                      alert("Project deleted successfully");
+                      refetch();
                     }}
                   />
                 </DropdownMenuContent>
