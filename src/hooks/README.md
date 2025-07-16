@@ -11,7 +11,7 @@ Detects if the current viewport width is less than the mobile breakpoint (768px)
 **Usage:**
 
 ```js
-import { useIsMobile } from '../hooks/use-mobile';
+import { useIsMobile } from "../hooks/use-mobile";
 
 const isMobile = useIsMobile();
 ```
@@ -32,9 +32,9 @@ Fetches data from a given API URL with an optional Bearer token for authorizatio
 **Usage:**
 
 ```js
-import { useApiToken } from '../hooks/useApiToken';
+import { useApiToken } from "../hooks/useApiToken";
 
-const data = useApiToken('/api/data', 'your-token-here');
+const data = useApiToken("/api/data", "your-token-here");
 ```
 
 **Returns:** The fetched data or `null`.
@@ -53,15 +53,16 @@ Manages form state and submission for client-side forms. Handles field changes, 
 **Usage:**
 
 ```js
-import { useClientForm } from '../hooks/useClientForm';
+import { useClientForm } from "../hooks/useClientForm";
 
 const { fields, handleChange, handleSubmit, error, loading } = useClientForm({
-  url: '/api/submit',
-  onSuccess: (result) => console.log('Form submitted', result),
+  url: "/api/submit",
+  onSuccess: (result) => console.log("Form submitted", result),
 });
 ```
 
 **Returns:** An object containing:
+
 - `fields`: Current form field values.
 - `handleChange(name, value)`: Function to update a field value.
 - `handleSubmit(event)`: Function to handle form submission.
@@ -81,7 +82,7 @@ Reads a JWT token from a cookie (default cookie name `"token"`), decodes it, and
 **Usage:**
 
 ```js
-import { useClientToken } from '../hooks/useClientToken';
+import { useClientToken } from "../hooks/useClientToken";
 
 const user = useClientToken();
 ```
@@ -90,7 +91,32 @@ const user = useClientToken();
 
 ---
 
+## useClientFetch
+
+Fetches data from a specified API endpoint on the client side using the GET method. Returns an object containing the fetched data, loading state, error state, and a refetch function to reload the data.
+
+**Parameters:**
+
+- `url` (string): The API endpoint URL to fetch data from.
+- `method` (string): HTTP method, typically "GET".
+
+**Usage:**
+
+```js
+import { useClientFetch } from "../hooks/useClientFetch";
+
+const { data, loading, error, refetch } = useClientFetch("/api/project", "GET");
+```
+
+**Returns:** An object with:
+
+- `data`: The fetched data or `null` if not loaded.
+- `loading`: Boolean indicating if the fetch is in progress.
+- `error`: Error message if the fetch failed.
+- `refetch`: Function to manually refetch the data.
+
+---
+
 ## Notes
 
-- The `useToken.jsx` file appears to be empty or unavailable and is not documented here.
 - These hooks are designed to simplify common client-side tasks such as responsive design detection, API data fetching with authentication, form handling, and token management.

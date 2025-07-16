@@ -64,9 +64,11 @@ export function NavProjects() {
                   className="w-48 rounded-lg"
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}>
-                  <DropdownMenuItem>
-                    <Folder className="text-muted-foreground" />
-                    <span>View Project</span>
+                  <DropdownMenuItem asChild>
+                    <Link href={`/dashboard/projects/${item.id}`}>
+                      <Folder className="text-muted-foreground" />
+                      <span>View Project</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Forward className="text-muted-foreground" />
