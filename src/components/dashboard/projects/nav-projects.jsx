@@ -1,6 +1,6 @@
 "use client";
 
-import { Forward, MoreHorizontal, FolderGit2 } from "lucide-react";
+import { Folder, Forward, MoreHorizontal, FolderGit2 } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -22,9 +22,9 @@ import {
 import { useState } from "react";
 import { useClientFetch } from "@/hooks/useClientFetch";
 import { ProjectDelete } from "./project-delete";
-import { ProjectViewLink } from "./project-view-link";
 import { ShowMoreProjects } from "./show-more-projects";
 import { SkeletonList } from "@/components/ui/skeleton-list";
+import Link from "next/link";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
@@ -66,7 +66,10 @@ export function NavProjects() {
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}>
                   <DropdownMenuItem asChild>
-                    <ProjectViewLink projectId={item.id} />
+                    <Link href={`/dashboard/projects/${item.id}`}>
+                      <Folder className="text-muted-foreground" />
+                      <span>View Project</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Forward className="text-muted-foreground" />
