@@ -23,13 +23,14 @@ import { useState } from "react";
 import { useClientFetch } from "@/hooks/useClientFetch";
 import Link from "next/link";
 import { ProjectDelete } from "./project-delete";
+import { SkeletonList } from "@/components/ui/skeleton-list";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
   const {
     data: projects,
-    loading,
     error,
+    loading,
     refetch,
   } = useClientFetch("/api/project", "GET");
 
@@ -41,10 +42,9 @@ export function NavProjects() {
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
-        {loading && <div>Loading projects...</div>}
         {error && <div>Error loading projects: {error}</div>}
+        {loading && <SkeletonList count={5} icon={true} />}
         {!loading &&
-          !error &&
           (showAll ? projects || [] : displayedProjects).map((item) => (
             <SidebarMenuItem key={item.id}>
               <SidebarMenuButton asChild>
