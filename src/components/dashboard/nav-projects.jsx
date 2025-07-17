@@ -23,6 +23,7 @@ import { useState } from "react";
 import { useClientFetch } from "@/hooks/useClientFetch";
 import { ProjectDelete } from "./project-delete";
 import { ProjectViewLink } from "./project-view-link";
+import { ShowMoreProjects } from "./show-more-projects";
 import { SkeletonList } from "@/components/ui/skeleton-list";
 
 export function NavProjects() {
@@ -82,16 +83,11 @@ export function NavProjects() {
               </DropdownMenu>
             </SidebarMenuItem>
           ))}
-        {projects && projects.length > 5 && !showAll && (
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="text-sidebar-foreground/70"
-              onClick={() => setShowAll(true)}>
-              <MoreHorizontal className="text-sidebar-foreground/70" />
-              <span>More</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        )}
+        <ShowMoreProjects
+          projectsCount={projects ? projects.length : 0}
+          showAll={showAll}
+          setShowAll={setShowAll}
+        />
       </SidebarMenu>
     </SidebarGroup>
   );
