@@ -33,7 +33,7 @@ export function NavProjects() {
     error,
     loading,
     refetch,
-  } = useClientFetch("/api/project", "GET");
+  } = useClientFetch("/api/project?id&title", "GET");
 
   const displayedProjects = projects ? projects.slice(0, 5) : [];
 
