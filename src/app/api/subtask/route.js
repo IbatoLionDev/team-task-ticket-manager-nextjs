@@ -1,20 +1,20 @@
 import { prisma } from "@/lib/prisma";
-import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 
+// GET all subtasks
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const allFields = [
       "id",
-      "firstName",
-      "username",
-      "lastName",
-      "email",
-      "phoneNumber",
+      "taskId",
+      "task",
+      "title",
+      "description",
+      "isDone",
       "createdAt",
       "updatedAt",
-      "tasks",
+      "finishedAt",
     ];
     let select = {};
     let hasQueryParams = false;
@@ -42,175 +42,164 @@ export async function GET(request) {
         take = pageSize;
       }
     }
-    const users = await prisma.user.findMany({
+    const subtasks = await prisma.subtask.findMany({
       select,
       ...(typeof skip !== "undefined" ? { skip } : {}),
       ...(typeof take !== "undefined" ? { take } : {}),
     });
-    return NextResponse.json(users, { status: 200 });
+    return NextResponse.json(subtasks, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to fetch users" },
+      { error: "Failed to fetch subtasks" },
       { status: 500 }
     );
   }
 }
 
+// POST create a new subtask
 export async function POST(request) {
   try {
-    const { firstName, username, lastName, email, password, phoneNumber } =
+    const { taskId, title, description, isDone, finishedAt } =
       await request.json();
 
-    if (!firstName || !username || !lastName || !email || !password)
+    if (!taskId || !title || !description)
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
 
-    const hashedPassword = await hash(password, 10); // hash password before saving
-
-    const newUser = await prisma.user.create({
+    const newSubtask = await prisma.subtask.create({
       data: {
-        firstName,
-        username,
-        lastName,
-        email,
-        password: hashedPassword,
-        phoneNumber,
+        taskId,
+        title,
+        description,
+        isDone: isDone ?? false,
+        finishedAt,
       },
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
-        tasks: true,
+      include: {
+        task: true,
       },
     });
 
-    return NextResponse.json(newUser, { status: 201 });
+    return NextResponse.json(newSubtask, { status: 201 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to create user" },
+      { error: "Failed to create subtask" },
       { status: 500 }
     );
   }
 }
 
+// PUT update a subtask (full update)
 export async function PUT(request) {
   try {
-    const { id, firstName, username, lastName, email, password, phoneNumber } =
+    const { id, taskId, title, description, isDone, finishedAt } =
       await request.json();
 
     if (!id)
-      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing subtask id" },
+        { status: 400 }
+      );
 
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
-      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid subtask id" },
+        { status: 400 }
+      );
 
-    const dataToUpdate = {
-      firstName,
-      username,
-      lastName,
-      email,
-      phoneNumber,
-    };
-    if (password) dataToUpdate.password = await hash(password, 10);
-
-    const updatedUser = await prisma.user.update({
+    const updatedSubtask = await prisma.subtask.update({
       where: { id: idInt },
-      data: dataToUpdate,
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
-        tasks: true,
+      data: {
+        taskId,
+        title,
+        description,
+        isDone,
+        finishedAt,
+      },
+      include: {
+        task: true,
       },
     });
 
-    return NextResponse.json(updatedUser, { status: 200 });
+    return NextResponse.json(updatedSubtask, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to update user" },
+      { error: "Failed to update subtask" },
       { status: 500 }
     );
   }
 }
 
+// PATCH update a subtask (partial update)
 export async function PATCH(request) {
   try {
     const { id, ...data } = await request.json();
 
     if (!id)
-      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing subtask id" },
+        { status: 400 }
+      );
 
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
-      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid subtask id" },
+        { status: 400 }
+      );
 
-    if (data.password) data.password = await hash(data.password, 10);
-    else delete data.password;
-
-    const updatedUser = await prisma.user.update({
+    const updatedSubtask = await prisma.subtask.update({
       where: { id: idInt },
       data,
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
-        tasks: true,
+      include: {
+        task: true,
       },
     });
 
-    return NextResponse.json(updatedUser, { status: 200 });
+    return NextResponse.json(updatedSubtask, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to patch user" },
+      { error: "Failed to patch subtask" },
       { status: 500 }
     );
   }
 }
 
+// DELETE a subtask
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id)
-      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing subtask id" },
+        { status: 400 }
+      );
 
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
-      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid subtask id" },
+        { status: 400 }
+      );
 
-    await prisma.user.delete({ where: { id: idInt } });
+    await prisma.subtask.delete({ where: { id: idInt } });
 
     return NextResponse.json(
-      { message: "User deleted successfully" },
+      { message: "Subtask deleted successfully" },
       { status: 200 }
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to delete user" },
+      { error: "Failed to delete subtask" },
       { status: 500 }
     );
   }

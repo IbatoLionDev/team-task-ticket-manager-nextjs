@@ -1,19 +1,21 @@
 import { prisma } from "@/lib/prisma";
-import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 
+// GET all projects
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const allFields = [
       "id",
-      "firstName",
-      "username",
-      "lastName",
-      "email",
-      "phoneNumber",
-      "createdAt",
+      "title",
+      "description",
+      "owner",
+      "type",
+      "urgency",
+      "expectedPayment",
+      "startDate",
       "updatedAt",
+      "finishedAt",
       "tasks",
     ];
     let select = {};
@@ -42,175 +44,196 @@ export async function GET(request) {
         take = pageSize;
       }
     }
-    const users = await prisma.user.findMany({
+    const projects = await prisma.project.findMany({
       select,
       ...(typeof skip !== "undefined" ? { skip } : {}),
       ...(typeof take !== "undefined" ? { take } : {}),
     });
-    return NextResponse.json(users, { status: 200 });
+    return NextResponse.json(projects, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to fetch users" },
+      { error: "Failed to fetch projects" },
       { status: 500 }
     );
   }
 }
 
+// POST create a new project
 export async function POST(request) {
   try {
-    const { firstName, username, lastName, email, password, phoneNumber } =
-      await request.json();
+    const {
+      title,
+      description,
+      owner,
+      type,
+      urgency,
+      expectedPayment,
+      startDate,
+      finishedAt,
+      tasks,
+    } = await request.json();
 
-    if (!firstName || !username || !lastName || !email || !password)
+    if (
+      !title ||
+      !description ||
+      !owner ||
+      !type ||
+      !urgency ||
+      expectedPayment === undefined
+    )
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
 
-    const hashedPassword = await hash(password, 10); // hash password before saving
-
-    const newUser = await prisma.user.create({
+    const newProject = await prisma.project.create({
       data: {
-        firstName,
-        username,
-        lastName,
-        email,
-        password: hashedPassword,
-        phoneNumber,
+        title,
+        description,
+        owner,
+        type,
+        urgency,
+        expectedPayment,
+        startDate,
+        finishedAt,
+        tasks: tasks ? { create: tasks } : undefined,
       },
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         tasks: true,
       },
     });
 
-    return NextResponse.json(newUser, { status: 201 });
+    return NextResponse.json(newProject, { status: 201 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to create user" },
+      { error: "Failed to create project" },
       { status: 500 }
     );
   }
 }
 
+// PUT update a project (full update)
 export async function PUT(request) {
   try {
-    const { id, firstName, username, lastName, email, password, phoneNumber } =
-      await request.json();
+    const {
+      id,
+      title,
+      description,
+      owner,
+      type,
+      urgency,
+      expectedPayment,
+      startDate,
+      finishedAt,
+    } = await request.json();
 
     if (!id)
-      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing project id" },
+        { status: 400 }
+      );
 
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
-      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid project id" },
+        { status: 400 }
+      );
 
-    const dataToUpdate = {
-      firstName,
-      username,
-      lastName,
-      email,
-      phoneNumber,
-    };
-    if (password) dataToUpdate.password = await hash(password, 10);
-
-    const updatedUser = await prisma.user.update({
+    const updatedProject = await prisma.project.update({
       where: { id: idInt },
-      data: dataToUpdate,
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
+      data: {
+        title,
+        description,
+        owner,
+        type,
+        urgency,
+        expectedPayment,
+        startDate,
+        finishedAt,
+      },
+      include: {
         tasks: true,
       },
     });
 
-    return NextResponse.json(updatedUser, { status: 200 });
+    return NextResponse.json(updatedProject, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to update user" },
+      { error: "Failed to update project" },
       { status: 500 }
     );
   }
 }
 
+// PATCH update a project (partial update)
 export async function PATCH(request) {
   try {
     const { id, ...data } = await request.json();
 
     if (!id)
-      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing project id" },
+        { status: 400 }
+      );
 
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
-      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid project id" },
+        { status: 400 }
+      );
 
-    if (data.password) data.password = await hash(data.password, 10);
-    else delete data.password;
-
-    const updatedUser = await prisma.user.update({
+    const updatedProject = await prisma.project.update({
       where: { id: idInt },
       data,
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         tasks: true,
       },
     });
 
-    return NextResponse.json(updatedUser, { status: 200 });
+    return NextResponse.json(updatedProject, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to patch user" },
+      { error: "Failed to patch project" },
       { status: 500 }
     );
   }
 }
 
+// DELETE a project
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id)
-      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing project id" },
+        { status: 400 }
+      );
 
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
-      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid project id" },
+        { status: 400 }
+      );
 
-    await prisma.user.delete({ where: { id: idInt } });
+    await prisma.project.delete({ where: { id: idInt } });
 
     return NextResponse.json(
-      { message: "User deleted successfully" },
+      { message: "Project deleted successfully" },
       { status: 200 }
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to delete user" },
+      { error: "Failed to delete project" },
       { status: 500 }
     );
   }

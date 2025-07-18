@@ -21,4 +21,61 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   phoneNumber String?
+  tasks       Task[]
+}
+
+model Subtask {
+  id          Int       @id @default(autoincrement())
+  taskId      Int
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  isDone      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  finishedAt  DateTime?
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Project {
+  id              Int         @id @default(autoincrement())
+  title           String
+  description     String
+  owner           String
+  type            ProjectType
+  urgency         Urgency
+  expectedPayment Float
+  startDate       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  finishedAt      DateTime?
+  tasks           Task[]
+}
+
+enum ProjectType {
+  DELIVER_AND_DONE
+  DELIVER_AND_MAINTAIN
+  MAINTAIN_EXISTING
+  INTERNAL
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  projectId   Int
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId      Int?
+  user        User?     @relation(fields: [userId], references: [id])
+  title       String
+  description String
+  urgency     Urgency
+  isDone      Boolean   @default(false)
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  finishedAt  DateTime?
+  subTasks    Subtask[]
 }
