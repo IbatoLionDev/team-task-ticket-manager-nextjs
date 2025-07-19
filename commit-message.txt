@@ -1,0 +1,8 @@
+feat: add dark mode support based on system preferences using next-themes
+
+- Converted RootLayout to a client component to handle theme state properly.
+- Integrated next-themes ThemeProvider with attribute="class" to toggle dark mode.
+- Added useTheme hook to delay rendering until theme is mounted to prevent hydration errors.
+- Enabled system theme detection with defaultTheme="system" and enableSystem.
+- Disabled CSS transitions on theme change with disableTransitionOnChange to avoid flickering.
+- Extracted metadata export to separate file to comply with Next.js client component restrictions.
