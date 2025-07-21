@@ -33,7 +33,7 @@ export default function LandingPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-600">
               <CheckSquare className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold">TaskFlow</span>
+            <span className="text-xl font-bold">LionProyectsFlow</span>
           </div>
 
           <nav className="hidden md:flex items-center space-x-6">
@@ -48,9 +48,9 @@ export default function LandingPage() {
               Benefits
             </Link>
             <Link
-              href="#pricing"
+              href="#more"
               className="text-sm font-medium hover:text-rose-600 transition-colors">
-              Pricing
+              More
             </Link>
             <Link
               href="#about"
@@ -61,10 +61,10 @@ export default function LandingPage() {
 
           <div className="flex items-center space-x-3">
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/signin">Sign In</Link>
+              <Link href="/sign-in">Sign In</Link>
             </Button>
             <Button size="sm" className="bg-rose-600 hover:bg-rose-700" asChild>
-              <Link href="/signup">Sign Up</Link>
+              <Link href="/sign-up">Sign Up</Link>
             </Button>
             <ModeToggle />
           </div>
@@ -100,13 +100,17 @@ export default function LandingPage() {
                     size="lg"
                     className="bg-rose-600 hover:bg-rose-700"
                     asChild>
-                    <Link href="/signup">
+                    <Link href="/sign-up">
                       Start Free Trial
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
-                    <Link href="#demo">Watch Demo</Link>
+                    <Link
+                      href="https://github.com/IbatoLionDev/team-task-ticket-manager-nextjs"
+                      target="_blank">
+                      Watch Repo
+                    </Link>
                   </Button>
                 </div>
 
@@ -126,7 +130,7 @@ export default function LandingPage() {
                 <div className="relative z-10">
                   <Image
                     src="/placeholder.svg?height=600&width=800"
-                    alt="TaskFlow Dashboard"
+                    alt="LionProyectsFlow Dashboard"
                     width={800}
                     height={600}
                     className="rounded-xl shadow-2xl border"
@@ -248,7 +252,7 @@ export default function LandingPage() {
                   <Badge
                     variant="secondary"
                     className="bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200">
-                    Why Choose TaskFlow
+                    Why Choose LionProyectsFlow
                   </Badge>
                   <h2 className="text-3xl md:text-5xl font-bold">
                     Boost productivity by 40% with smart workflows
@@ -323,7 +327,7 @@ export default function LandingPage() {
         </section>
 
         {/* GitHub Section */}
-        <section className="py-16 bg-muted/30">
+        <section id="more" className="py-16 bg-muted/30">
           <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
             <h2 className="text-3xl md:text-5xl font-bold">
               Explore My Work on GitHub
@@ -338,19 +342,6 @@ export default function LandingPage() {
                 className="bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-900 hover:to-black flex items-center space-x-4 py-5 px-10 text-xl shadow-lg hover:shadow-xl"
                 asChild>
                 <Link href="https://github.com/IbatoLionDev" target="_blank">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="h-10 w-10">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75 0 4.302 2.794 7.946 6.676 9.229.488.09.664-.212.664-.472 0-.233-.008-.85-.013-1.67-2.713.588-3.287-1.308-3.287-1.308-.444-1.127-1.084-1.427-1.084-1.427-.887-.606.067-.594.067-.594 1.003.07 1.53 1.03 1.53 1.03.872 1.495 2.287 1.063 2.846.814.09-.632.342-1.063.622-1.307-2.166-.246-4.442-1.083-4.442-4.823 0-1.065.38-1.935 1.03-2.617-.103-.247-.447-1.24.098-2.586 0 0 .84-.27 2.75 1.026a9.564 9.564 0 0 1 5 0c1.91-1.296 2.75-1.026 2.75-1.026.545 1.346.201 2.339.098 2.586.65.682 1.03 1.552 1.03 2.617 0 3.75-2.28 4.573-4.452 4.815.352.303.664.902.664 1.818 0 1.312-.012 2.37-.012 2.692 0 .262.174.566.67.47A9.753 9.753 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75z"
-                    />
-                  </svg>
                   <span>Visit GitHub</span>
                 </Link>
               </Button>
@@ -367,7 +358,7 @@ export default function LandingPage() {
               </h2>
               <p className="text-xl opacity-90 max-w-2xl mx-auto">
                 Join thousands of teams who have already streamlined their
-                workflow with TaskFlow. Start your free trial today.
+                workflow with LionProyectsFlow. Start your free trial today.
               </p>
             </div>
 
@@ -377,7 +368,7 @@ export default function LandingPage() {
                 variant="secondary"
                 className="bg-white text-rose-600 hover:bg-gray-100"
                 asChild>
-                <Link href="/signup">
+                <Link href="/sign-up">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -387,7 +378,7 @@ export default function LandingPage() {
                 variant="outline"
                 className="border-white text-white hover:bg-white hover:text-rose-600 bg-transparent"
                 asChild>
-                <Link href="/contact">Contact Sales</Link>
+                <Link href="mailto:ibatolion@gmail.com">Contact Me</Link>
               </Button>
             </div>
 
@@ -407,7 +398,7 @@ export default function LandingPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-600">
                   <CheckSquare className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">TaskFlow</span>
+                <span className="text-xl font-bold">LionProyectsFlow</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Empowering teams to achieve more through better collaboration
@@ -496,7 +487,8 @@ export default function LandingPage() {
 
           <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} TaskFlow. All rights reserved.
+              © {new Date().getFullYear()} LionProyectsFlow. All rights
+              reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link

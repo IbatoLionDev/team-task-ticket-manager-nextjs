@@ -109,3 +109,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.645 0.246 16.439);
 }
+
+html {
+  scroll-behavior: smooth;
+}
