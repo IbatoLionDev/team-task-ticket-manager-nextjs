@@ -53,7 +53,7 @@ export default function LandingPage() {
               More
             </Link>
             <Link
-              href="#about"
+              href="/about"
               className="text-sm font-medium hover:text-rose-600 transition-colors">
               About
             </Link>
