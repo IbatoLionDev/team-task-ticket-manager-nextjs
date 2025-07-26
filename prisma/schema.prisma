@@ -21,25 +21,38 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   phoneNumber String?
-  tasks       Task[]
+
+  assignedTasks     Task[]    @relation("TaskAssignedTo")
+  completedTasks    Task[]    @relation("TaskCompletedBy")
+  completedSubtasks Subtask[] @relation("SubtaskCompletedBy")
 }
 
 model Subtask {
-  id          Int       @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   taskId      Int
-  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task        Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
   title       String
   description String
-  isDone      Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isDone      Boolean    @default(false)
+  status      TaskStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   finishedAt  DateTime?
+
+  completedById Int?
+  completedBy   User? @relation("SubtaskCompletedBy", fields: [completedById], references: [id])
 }
 
 enum Urgency {
   LOW
   MEDIUM
   HIGH
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
 }
 
 model Project {
@@ -64,18 +77,21 @@ enum ProjectType {
 }
 
 model Task {
-  id          Int       @id @default(autoincrement())
-  projectId   Int
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  userId      Int?
-  user        User?     @relation(fields: [userId], references: [id])
-  title       String
-  description String
-  urgency     Urgency
-  isDone      Boolean   @default(false)
-  dueDate     DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  finishedAt  DateTime?
-  subTasks    Subtask[]
+  id            Int        @id @default(autoincrement())
+  projectId     Int
+  project       Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedToId  Int?
+  assignedTo    User?      @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  completedById Int?
+  completedBy   User?      @relation("TaskCompletedBy", fields: [completedById], references: [id])
+  title         String
+  description   String
+  urgency       Urgency
+  isDone        Boolean    @default(false)
+  status        TaskStatus @default(PENDING)
+  dueDate       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  finishedAt    DateTime?
+  subTasks      Subtask[]
 }
