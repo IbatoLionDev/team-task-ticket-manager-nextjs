@@ -1,28 +1,44 @@
-# Subtask Dynamic Route API
+# API Subtask by ID Endpoint
 
-This API provides an endpoint to fetch a single subtask by its ID. You can filter the fields returned by passing query parameters with the field names.
+This endpoint provides detailed information about a specific subtask identified by its ID.
 
-## Endpoint
+## Available Method
 
-### GET /api/subtask/[id]
+### GET
 
-Returns a single subtask by its ID.
+- Retrieves a subtask by its ID.
+- Supports field selection via query parameters. For example, `?title=true&status=true` will return only those fields.
+- Returns subtask information including related task entity.
 
-**Params:**
+## Managed Fields
 
-- `id` (int, required): Subtask ID (as part of the URL)
+- `id` (Int): Unique identifier of the subtask.
+- `taskId` (Int): ID of the associated task.
+- `task` (Task): The task object.
+- `title` (String): Title of the subtask.
+- `description` (String): Description of the subtask.
+- `status` (TaskStatus enum): Current status of the subtask.
+- `createdAt` (DateTime): Timestamp when the subtask was created.
+- `updatedAt` (DateTime): Timestamp when the subtask was last updated.
+- `finishedAt` (DateTime, optional): Timestamp when the subtask was finished.
 
-**Query Parameters:**
+## Error Handling
 
-- Any field name (e.g. `title`, `isDone`, etc.) — if present, only those fields will be returned for the subtask.
+- Returns appropriate HTTP status codes and error messages for:
+  - Invalid subtask ID.
+  - Subtask not found.
+  - Server errors during the query.
 
-**Examples:**
+## Notes
 
-- `/api/subtask/1?title&isDone` returns only the title and isDone fields for the subtask with id 1.
-- `/api/subtask/1` returns all fields for the subtask with id 1.
+- This endpoint is adapted to the Prisma schema defined in `prisma/schema.prisma`.
+- Related task entity is eagerly loaded to provide comprehensive subtask information.
+- Client applications should handle nested data appropriately.
 
-**Response:**
+## Example Request
 
-- 200: Subtask object (with its parent task if requested)
-- 400: Invalid subtask id
-- 404: Subtask not found
+```
+GET /api/subtask/1?title=true&status=true
+```
+
+Returns the subtask with ID 1, showing only the `title` and `status` fields along with related task entity.

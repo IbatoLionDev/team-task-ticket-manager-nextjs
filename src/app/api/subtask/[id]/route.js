@@ -10,7 +10,7 @@ export async function GET(request, { params }) {
     "task",
     "title",
     "description",
-    "isDone",
+    "status",
     "createdAt",
     "updatedAt",
     "finishedAt",
