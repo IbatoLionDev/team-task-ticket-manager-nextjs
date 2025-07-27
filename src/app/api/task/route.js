@@ -9,12 +9,12 @@ export async function GET(request) {
       "id",
       "projectId",
       "project",
-      "userId",
-      "user",
+      "assignedToId",
+      "assignedTo",
       "title",
       "description",
       "urgency",
-      "isDone",
+      "status",
       "dueDate",
       "createdAt",
       "updatedAt",
@@ -67,11 +67,11 @@ export async function POST(request) {
   try {
     const {
       projectId,
-      userId,
+      assignedToId,
       title,
       description,
       urgency,
-      isDone,
+      status,
       dueDate,
       finishedAt,
       subTasks,
@@ -86,18 +86,18 @@ export async function POST(request) {
     const newTask = await prisma.task.create({
       data: {
         projectId,
-        userId,
+        assignedToId,
         title,
         description,
         urgency,
-        isDone: isDone ?? false,
+        status: status ?? "PENDING",
         dueDate,
         finishedAt,
         subTasks: subTasks ? { create: subTasks } : undefined,
       },
       include: {
         project: true,
-        user: true,
+        assignedTo: true,
         subTasks: true,
       },
     });
@@ -118,11 +118,11 @@ export async function PUT(request) {
     const {
       id,
       projectId,
-      userId,
+      assignedToId,
       title,
       description,
       urgency,
-      isDone,
+      status,
       dueDate,
       finishedAt,
     } = await request.json();
@@ -138,17 +138,17 @@ export async function PUT(request) {
       where: { id: idInt },
       data: {
         projectId,
-        userId,
+        assignedToId,
         title,
         description,
         urgency,
-        isDone,
+        status,
         dueDate,
         finishedAt,
       },
       include: {
         project: true,
-        user: true,
+        assignedTo: true,
         subTasks: true,
       },
     });
@@ -180,7 +180,7 @@ export async function PATCH(request) {
       data,
       include: {
         project: true,
-        user: true,
+        assignedTo: true,
         subTasks: true,
       },
     });

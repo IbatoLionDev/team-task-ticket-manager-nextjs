@@ -1,47 +1,52 @@
-# Task Dynamic Route API
+# API Task by ID Endpoint
 
-This API provides an endpoint to fetch a single task by its ID. You can filter the fields returned by passing query parameters with the field names.
+This endpoint provides detailed information about a specific task identified by its ID.
 
-## Endpoint
+## Available Method
 
-### GET /api/task/[id]
+### GET
 
-Returns a single task by its ID.
+- Retrieves a task by its ID.
+- Supports field selection via query parameters. For example, `?title=true&status=true` will return only those fields.
+- Returns task information including related entities:
+  - `project`: The project to which the task belongs.
+  - `assignedTo`: The user assigned to the task.
+  - `subTasks`: The subtasks associated with the task.
 
-**Params:**
+## Managed Fields
 
-- `id` (int, required): Task ID (as part of the URL)
+- `id` (Int): Unique identifier of the task.
+- `projectId` (Int): ID of the related project.
+- `project` (Project): Related project object.
+- `assignedToId` (Int, optional): ID of the assigned user.
+- `assignedTo` (User, optional): Assigned user object.
+- `title` (String): Title of the task.
+- `description` (String): Description of the task.
+- `urgency` (Urgency enum): Urgency level of the task.
+- `status` (TaskStatus enum): Current status of the task.
+- `dueDate` (DateTime, optional): Due date of the task.
+- `createdAt` (DateTime): Timestamp of task creation.
+- `updatedAt` (DateTime): Timestamp of last update.
+- `finishedAt` (DateTime, optional): Completion date of the task.
+- `subTasks` (Subtask[]): List of subtasks.
 
-**Query Parameters:**
+## Error Handling
 
-- Any field name (e.g. `title`, `urgency`, etc.) — if present, only those fields will be returned for the task.
+- Returns appropriate HTTP status codes and error messages for:
+  - Invalid task ID.
+  - Task not found.
+  - Server errors during the query.
 
-**Examples:**
+## Notes
 
-- `/api/task/1?title&urgency` returns only the title and urgency fields for the task with id 1.
-- `/api/task/1` returns all fields for the task with id 1.
+- This endpoint is adapted to the Prisma schema defined in `prisma/schema.prisma`.
+- Related entities are eagerly loaded to provide comprehensive task information.
+- Client applications should handle nested data appropriately.
 
-**Response:**
-
-- 200: Task object (with project, user, and subtasks if requested)
-- 400: Invalid task id
-- 404: Task not found
-
-**Example:**
+## Example Request
 
 ```
-GET /api/task/1
+GET /api/task/1?title=true&status=true
 ```
 
-**Response:**
-
-```
-{
-  "id": 1,
-  "title": "Task A",
-  ...
-  "project": { ... },
-  "user": { ... },
-  "subTasks": [ ... ]
-}
-```
+Returns the task with ID 1, showing only the `title` and `status` fields along with related entities.

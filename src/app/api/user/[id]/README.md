@@ -1,50 +1,50 @@
-# User Dynamic Route API
+# API User by ID Endpoint
 
-This API provides an endpoint to fetch a single user by their ID. You can filter the fields returned by passing query parameters with the field names.
+This endpoint provides access to detailed information of a specific user identified by their ID.
 
-## Endpoint
+## Available Method
 
-### GET /api/user/[id]
+### GET
 
-Returns a single user by their ID.
+- Retrieves a user by their ID.
+- Supports field selection via query parameters. For example, `?firstName=true&email=true` will return only those fields.
+- Returns user information including task relations:
+  - `assignedTasks`: Tasks assigned to the user.
+  - `completedTasks`: Tasks completed by the user.
+  - `completedSubtasks`: Subtasks completed by the user.
 
-**Params:**
+## Managed Fields
 
-- `id` (int, required): User ID (as part of the URL)
+- `id` (Int): Unique identifier of the user.
+- `firstName` (String): User's first name.
+- `username` (String): Unique username.
+- `lastName` (String): User's last name.
+- `email` (String): Unique email address.
+- `phoneNumber` (String, optional): User's phone number.
+- `createdAt` (DateTime): Timestamp of user creation.
+- `updatedAt` (DateTime): Timestamp of last update.
+- Relations:
+  - `assignedTasks` (Task[]): Tasks assigned to the user.
+  - `completedTasks` (Task[]): Tasks completed by the user.
+  - `completedSubtasks` (Subtask[]): Subtasks completed by the user.
 
-**Query Parameters:**
+## Error Handling
 
-- Any field name (e.g. `email`, `username`, etc.) — if present, only those fields will be returned for the user.
+- Returns appropriate HTTP status codes and error messages for:
+  - Invalid user ID.
+  - User not found.
+  - Server errors during the query.
 
-**Examples:**
+## Notes
 
-- `/api/user/1?email&username` returns only the email and username fields for the user with id 1.
-- `/api/user/1` returns all fields for the user with id 1.
+- This endpoint is adapted to the Prisma schema defined in `prisma/schema.prisma`.
+- Task relations are eagerly loaded to provide comprehensive user information.
+- Client applications should handle nested task data appropriately.
 
-**Response:**
-
-- 200: User object (with their tasks if requested)
-- 400: Invalid user id
-- 404: User not found
-
-**Example:**
+## Example Request
 
 ```
-GET /api/user/1
+GET /api/user/1?firstName=true&email=true
 ```
 
-**Response:**
-
-```
-{
-  "id": 1,
-  "firstName": "John",
-  "username": "john123",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "phoneNumber": "1234567890",
-  "createdAt": "2025-07-07T12:00:00.000Z",
-  "updatedAt": "2025-07-07T12:00:00.000Z",
-  "tasks": [ ... ]
-}
-```
+Returns the user with ID 1, showing only the `firstName` and `email` fields along with task relations.

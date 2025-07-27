@@ -1,118 +1,109 @@
-# Subtask API
+# API Subtask Endpoint
 
-This API provides RESTful endpoints to manage subtasks in the system.
+This API endpoint provides full CRUD (Create, Read, Update, Delete) operations for the Subtask model, leveraging Prisma ORM for database interactions.
 
-## Endpoints
+## Overview
 
-### GET /api/subtask
+The Subtask model includes fields for task association, status, and timestamps. This endpoint ensures proper handling of these fields and relations.
 
-Returns a list of subtasks. You can filter the fields returned by passing query parameters with the field names. Si usas los parámetros `page` o `pageSize`, la respuesta será paginada; si no, se devuelven todos los subtasks.
+## Available HTTP Methods
 
-**Query Parameters:**
+### GET
 
-- Any field name (e.g. `title`, `isDone`, etc.) — if present, only those fields will be returned for each subtask.
-- `page` (optional): number — page number (pagination only if present)
-- `pageSize` (optional): number — number of subtasks per page (pagination only if present)
+- Retrieves a list of subtasks.
+- Supports filtering fields via query parameters. For example, `?title=true&status=true` will return only those fields.
+- Supports pagination with `page` and `pageSize` query parameters.
+- Returns subtask data including related task entity.
 
-**Examples:**
+### POST
 
-- `/api/subtask?title&isDone&page=2&pageSize=5` returns only the title and isDone fields for subtasks on page 2, 5 per page.
-- `/api/subtask?page=1&pageSize=20` returns the first 20 subtasks with all fields.
-- `/api/subtask` returns all subtasks with all fields (no pagination).
+- Creates a new subtask.
+- Required fields in the request body: `taskId`, `title`, `description`.
+- Optional fields: `status`, `finishedAt`.
+- Returns the created subtask data including related task.
 
-- **Response:**
-  - Status: 200 OK
-  - Body: JSON array of subtask objects (or paginated object if paginación activa)
+### PUT
 
-### GET /api/subtask/[id]
+- Fully updates an existing subtask identified by `id`.
+- Accepts all subtask fields in the request body.
+- Returns the updated subtask data including related task.
 
-Returns a single subtask by its ID. You can filter the fields returned by passing query parameters with the field names.
+### PATCH
 
-**Params:**
+- Partially updates an existing subtask identified by `id`.
+- Accepts any subset of subtask fields in the request body.
+- Returns the updated subtask data including related task.
 
-- `id` (int, required): Subtask ID (as part of the URL)
+### DELETE
 
-**Query Parameters:**
+- Deletes a subtask identified by `id`.
+- Requires `id` as a query parameter.
+- Returns a success message upon deletion.
 
-- Any field name (e.g. `title`, `isDone`, etc.) — if present, only those fields will be returned for the subtask.
+## Data Fields
 
-**Response:**
+- `id` (Int): Unique identifier for the subtask.
+- `taskId` (Int): ID of the related task.
+- `task` (Task): Related task object.
+- `title` (String): Title of the subtask.
+- `description` (String): Description of the subtask.
+- `status` (TaskStatus enum): Current status of the subtask.
+- `createdAt` (DateTime): Timestamp of subtask creation.
+- `updatedAt` (DateTime): Timestamp of last update.
+- `finishedAt` (DateTime, optional): Completion date of the subtask.
 
-- 200: Subtask object (with its parent task)
-- 400: Invalid subtask id
-- 404: Subtask not found
+## Error Handling
 
-### POST /api/subtask
+- Returns appropriate HTTP status codes and error messages for:
+  - Missing required fields.
+  - Invalid subtask IDs.
+  - Server errors during database operations.
 
-Creates a new subtask.
+## Pagination
 
-**Body:**
-
-```
-{
-  "taskId": int,
-  "title": "string",
-  "description": "string",
-  "isDone": boolean (optional),
-  "finishedAt": "YYYY-MM-DDTHH:mm:ss.sssZ" (optional)
-}
-```
-
-**Response:**
-
-- 201: Created subtask object
-- 400: Missing required fields
-
-### PUT /api/subtask
-
-Updates a subtask (full update).
-
-**Body:**
-
-```
-{
-  "id": int,
-  ...other fields as in POST...
-}
-```
-
-**Response:**
-
-- 200: Updated subtask object
-- 400: Missing or invalid subtask id
-
-### PATCH /api/subtask
-
-Updates a subtask (partial update).
-
-**Body:**
-
-```
-{
-  "id": int,
-  ...fields to update...
-}
-```
-
-**Response:**
-
-- 200: Updated subtask object
-- 400: Missing or invalid subtask id
-
-### DELETE /api/subtask?id=ID
-
-Deletes a subtask by its ID.
-
-**Response:**
-
-- 200: Success message
-- 400: Missing or invalid subtask id
-
----
+- Use `page` and `pageSize` query parameters in GET requests to paginate results.
+- Defaults: `page=1`, `pageSize=10` if not specified.
 
 ## Notes
 
-- If no query params are provided, all fields are returned.
-- If query params are provided, only those fields are returned.
-- Pagination is only applied if `page` or `pageSize` is present.
-- Returns related task in all responses.
+- This endpoint is tightly coupled with the Prisma schema defined in `prisma/schema.prisma`.
+- Related task entity is eagerly loaded to provide comprehensive subtask information.
+- Ensure that client applications handle nested data appropriately.
+
+## Example Requests
+
+### GET subtasks with pagination and selected fields
+
+```
+GET /api/subtask?page=2&pageSize=5&title=true&status=true
+```
+
+### POST create a new subtask
+
+```json
+{
+  "taskId": 1,
+  "title": "New Subtask",
+  "description": "Subtask description",
+  "status": "PENDING",
+  "finishedAt": null
+}
+```
+
+### PUT update a subtask
+
+```json
+{
+  "id": 1,
+  "taskId": 1,
+  "title": "Updated Subtask",
+  "description": "Updated description",
+  "status": "IN_PROGRESS",
+  "finishedAt": null
+}
+```
+
+### DELETE a subtask
+
+```
+DELETE /api/subtask?id=1

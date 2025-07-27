@@ -14,7 +14,9 @@ export async function GET(request) {
       "phoneNumber",
       "createdAt",
       "updatedAt",
-      "tasks",
+      "assignedTasks",
+      "completedTasks",
+      "completedSubtasks",
     ];
     let select = {};
     let hasQueryParams = false;
@@ -88,7 +90,9 @@ export async function POST(request) {
         phoneNumber: true,
         createdAt: true,
         updatedAt: true,
-        tasks: true,
+        assignedTasks: true,
+        completedTasks: true,
+        completedSubtasks: true,
       },
     });
 
@@ -135,7 +139,9 @@ export async function PUT(request) {
         phoneNumber: true,
         createdAt: true,
         updatedAt: true,
-        tasks: true,
+        assignedTasks: true,
+        completedTasks: true,
+        completedSubtasks: true,
       },
     });
 
@@ -175,7 +181,9 @@ export async function PATCH(request) {
         phoneNumber: true,
         createdAt: true,
         updatedAt: true,
-        tasks: true,
+        assignedTasks: true,
+        completedTasks: true,
+        completedSubtasks: true,
       },
     });
 

@@ -1,134 +1,130 @@
-# Task API
+# API Task Endpoint
 
-This API provides RESTful endpoints to manage tasks in the system.
+This API endpoint provides full CRUD (Create, Read, Update, Delete) operations for the Task model, leveraging Prisma ORM for database interactions.
 
-## Endpoints
+## Overview
 
-### GET /api/task
+The Task model includes fields for project association, assigned user, status, urgency, and related subtasks. This endpoint ensures proper handling of these fields and relations.
 
-Returns a paginated list of tasks. You can filter the fields returned by passing query parameters with the field names. Pagination is handled with `page` and `pageSize` query params.
+## Available HTTP Methods
 
-**Query Parameters:**
+### GET
 
-- Any field name (e.g. `title`, `urgency`, etc.) — if present, only those fields will be returned for each task.
-- `page` (optional): number — page number (default: 1)
-- `pageSize` (optional): number — number of tasks per page (default: 10)
+- Retrieves a list of tasks.
+- Supports filtering fields via query parameters. For example, `?title=true&status=true` will return only those fields.
+- Supports pagination with `page` and `pageSize` query parameters.
+- Returns task data including related entities:
+  - `project`: The project to which the task belongs.
+  - `assignedTo`: The user assigned to the task.
+  - `subTasks`: The subtasks associated with the task.
 
-**Examples:**
+### POST
 
-- `/api/task?title&urgency&page=2&pageSize=5` returns only the title and urgency fields for tasks on page 2, 5 per page.
-- `/api/task?page=1&pageSize=20` returns the first 20 tasks with all fields.
-- `/api/task` returns the first 10 tasks with all fields.
+- Creates a new task.
+- Required fields in the request body: `projectId`, `title`, `description`, `urgency`.
+- Optional fields: `assignedToId`, `status`, `dueDate`, `finishedAt`, `subTasks`.
+- Returns the created task data including related entities.
 
-**Response:**
+### PUT
 
-- Status: 200 OK
-- Body:
-  ```json
-  {
-    "data": [ ...tasks... ],
-    "page": 1,
-    "pageSize": 10,
-    "total": 100,
-    "totalPages": 10
-  }
-  ```
+- Fully updates an existing task identified by `id`.
+- Accepts all task fields in the request body.
+- Returns the updated task data including related entities.
 
-### GET /api/task/[id]
+### PATCH
 
-Returns a single task by its ID. You can filter the fields returned by passing query parameters with the field names.
+- Partially updates an existing task identified by `id`.
+- Accepts any subset of task fields in the request body.
+- Returns the updated task data including related entities.
 
-**Params:**
+### DELETE
 
-- `id` (int, required): Task ID (as part of the URL)
+- Deletes a task identified by `id`.
+- Requires `id` as a query parameter.
+- Returns a success message upon deletion.
 
-**Query Parameters:**
+## Data Fields
 
-- Any field name (e.g. `title`, `urgency`, etc.) — if present, only those fields will be returned for the task.
+- `id` (Int): Unique identifier for the task.
+- `projectId` (Int): ID of the related project.
+- `project` (Project): Related project object.
+- `assignedToId` (Int, optional): ID of the assigned user.
+- `assignedTo` (User, optional): Assigned user object.
+- `title` (String): Title of the task.
+- `description` (String): Description of the task.
+- `urgency` (Urgency enum): Urgency level of the task.
+- `status` (TaskStatus enum): Current status of the task.
+- `dueDate` (DateTime, optional): Due date of the task.
+- `createdAt` (DateTime): Timestamp of task creation.
+- `updatedAt` (DateTime): Timestamp of last update.
+- `finishedAt` (DateTime, optional): Completion date of the task.
+- `subTasks` (Subtask[]): List of subtasks.
 
-**Response:**
+## Error Handling
 
-- 200: Task object (with project, user, and subtasks)
-- 400: Invalid task id
-- 404: Task not found
+- Returns appropriate HTTP status codes and error messages for:
+  - Missing required fields.
+  - Invalid task IDs.
+  - Server errors during database operations.
 
-### POST /api/task
+## Pagination
 
-Creates a new task.
-
-**Body:**
-
-```
-{
-  "projectId": int,
-  "userId": int (optional),
-  "title": "string",
-  "description": "string",
-  "urgency": "LOW" | "MEDIUM" | "HIGH",
-  "isDone": boolean (optional),
-  "dueDate": "YYYY-MM-DDTHH:mm:ss.sssZ" (optional),
-  "finishedAt": "YYYY-MM-DDTHH:mm:ss.sssZ" (optional),
-  "subTasks": [ { ...subtask fields... } ] (optional)
-}
-```
-
-**Response:**
-
-- 201: Created task object
-- 400: Missing required fields
-
-### PUT /api/task
-
-Updates a task (full update).
-
-**Body:**
-
-```
-{
-  "id": int,
-  ...other fields as in POST...
-}
-```
-
-**Response:**
-
-- 200: Updated task object
-- 400: Missing or invalid task id
-
-### PATCH /api/task
-
-Updates a task (partial update).
-
-**Body:**
-
-```
-{
-  "id": int,
-  ...fields to update...
-}
-```
-
-**Response:**
-
-- 200: Updated task object
-- 400: Missing or invalid task id
-
-### DELETE /api/task?id=ID
-
-Deletes a task by its ID.
-
-**Response:**
-
-- 200: Success message
-- 400: Missing or invalid task id
-
----
+- Use `page` and `pageSize` query parameters in GET requests to paginate results.
+- Defaults: `page=1`, `pageSize=10` if not specified.
 
 ## Notes
 
-- If no query params are provided, all fields are returned.
-- If query params are provided, only those fields are returned.
-- Pagination is handled with `page` and `pageSize`.
-- All dates must be in ISO 8601 format.
-- The `subTasks` field is an array of subtask objects to be created with the task (optional).
-- Returns related project, user, and subtasks in all responses.
+- This endpoint is tightly coupled with the Prisma schema defined in `prisma/schema.prisma`.
+- Related entities are eagerly loaded to provide comprehensive task information.
+- Ensure that client applications handle nested data appropriately.
+
+## Example Requests
+
+### GET tasks with pagination and selected fields
+
+```
+GET /api/task?page=2&pageSize=5&title=true&status=true
+```
+
+### POST create a new task
+
+```json
+{
+  "projectId": 1,
+  "assignedToId": 2,
+  "title": "New Task",
+  "description": "Task description",
+  "urgency": "HIGH",
+  "status": "PENDING",
+  "dueDate": "2024-08-01T00:00:00.000Z",
+  "finishedAt": null,
+  "subTasks": [
+    {
+      "title": "Subtask 1",
+      "description": "Subtask description",
+      "status": "PENDING"
+    }
+  ]
+}
+```
+
+### PUT update a task
+
+```json
+{
+  "id": 1,
+  "projectId": 1,
+  "assignedToId": 2,
+  "title": "Updated Task",
+  "description": "Updated description",
+  "urgency": "MEDIUM",
+  "status": "IN_PROGRESS",
+  "dueDate": "2024-08-15T00:00:00.000Z",
+  "finishedAt": null
+}
+```
+
+### DELETE a task
+
+```
+DELETE /api/task?id=1

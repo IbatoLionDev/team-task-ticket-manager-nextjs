@@ -11,7 +11,7 @@ export async function GET(request) {
       "task",
       "title",
       "description",
-      "isDone",
+      "status",
       "createdAt",
       "updatedAt",
       "finishedAt",
@@ -60,7 +60,7 @@ export async function GET(request) {
 // POST create a new subtask
 export async function POST(request) {
   try {
-    const { taskId, title, description, isDone, finishedAt } =
+    const { taskId, title, description, status, finishedAt } =
       await request.json();
 
     if (!taskId || !title || !description)
@@ -74,7 +74,7 @@ export async function POST(request) {
         taskId,
         title,
         description,
-        isDone: isDone ?? false,
+        status: status ?? "PENDING",
         finishedAt,
       },
       include: {
@@ -95,7 +95,7 @@ export async function POST(request) {
 // PUT update a subtask (full update)
 export async function PUT(request) {
   try {
-    const { id, taskId, title, description, isDone, finishedAt } =
+    const { id, taskId, title, description, status, finishedAt } =
       await request.json();
 
     if (!id)
@@ -117,7 +117,7 @@ export async function PUT(request) {
         taskId,
         title,
         description,
-        isDone,
+        status,
         finishedAt,
       },
       include: {

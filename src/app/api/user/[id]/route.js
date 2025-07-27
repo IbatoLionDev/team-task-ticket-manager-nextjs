@@ -13,7 +13,9 @@ export async function GET(request, { params }) {
     "phoneNumber",
     "createdAt",
     "updatedAt",
-    "tasks",
+    "assignedTasks",
+    "completedTasks",
+    "completedSubtasks",
   ];
   let select = {};
   let hasQueryParams = false;
