@@ -7,9 +7,8 @@ export function useClientForm({ url, onSuccess }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (name, value) => {
+  const handleChange = (name, value) =>
     setFields((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,13 +23,13 @@ export function useClientForm({ url, onSuccess }) {
         body: JSON.stringify(fields),
       });
 
-      if (!res.ok) {
+      if (res.ok === false) {
         const data = await res.json();
         throw new Error(data.error || "Submission failed");
       }
 
       const result = await res.json();
-      if (onSuccess) onSuccess(result);
+      if (typeof onSuccess === "function") onSuccess(result);
     } catch (err) {
       setError(err.message);
     } finally {

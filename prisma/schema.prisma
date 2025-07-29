@@ -21,4 +21,75 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   phoneNumber String?
+
+  assignedTasks     Task[]    @relation("TaskAssignedTo")
+  completedTasks    Task[]    @relation("TaskCompletedBy")
+  completedSubtasks Subtask[] @relation("SubtaskCompletedBy")
+}
+
+model Subtask {
+  id          Int        @id @default(autoincrement())
+  taskId      Int
+  task        Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  status      TaskStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  finishedAt  DateTime?
+
+  completedById Int?
+  completedBy   User? @relation("SubtaskCompletedBy", fields: [completedById], references: [id])
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+model Project {
+  id              Int         @id @default(autoincrement())
+  title           String
+  description     String
+  owner           String
+  type            ProjectType
+  urgency         Urgency
+  expectedPayment Float
+  startDate       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  finishedAt      DateTime?
+  tasks           Task[]
+}
+
+enum ProjectType {
+  DELIVER_AND_DONE
+  DELIVER_AND_MAINTAIN
+  MAINTAIN_EXISTING
+  INTERNAL
+}
+
+model Task {
+  id            Int        @id @default(autoincrement())
+  projectId     Int
+  project       Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedToId  Int?
+  assignedTo    User?      @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  completedById Int?
+  completedBy   User?      @relation("TaskCompletedBy", fields: [completedById], references: [id])
+  title         String
+  description   String
+  urgency       Urgency
+  status        TaskStatus @default(PENDING)
+  dueDate       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  finishedAt    DateTime?
+  subTasks      Subtask[]
 }
