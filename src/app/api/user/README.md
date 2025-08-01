@@ -17,28 +17,30 @@ The User model includes personal information fields and relations to tasks and s
   - `assignedTasks`: Tasks assigned to the user.
   - `completedTasks`: Tasks completed by the user.
   - `completedSubtasks`: Subtasks completed by the user.
+- Includes the new `role` field indicating the user's role (`ADMIN` or `USER`).
 
 ### POST
 
 - Creates a new user.
 - Required fields in the request body: `firstName`, `username`, `lastName`, `email`, `password`.
-- Passwords are hashed using bcrypt before being saved.
 - Optional field: `phoneNumber`.
-- Returns the created user data including related tasks.
+- Optional field: `role` (must be either `ADMIN` or `USER`; defaults to `USER` if not provided).
+- Passwords are hashed using bcrypt before being saved.
+- Returns the created user data including related tasks and the `role` field.
 
 ### PUT
 
 - Fully updates an existing user identified by `id`.
-- Accepts all user fields in the request body.
+- Accepts all user fields in the request body including `role`.
 - Password, if provided, is hashed before saving.
-- Returns the updated user data including related tasks.
+- Returns the updated user data including related tasks and the `role` field.
 
 ### PATCH
 
 - Partially updates an existing user identified by `id`.
-- Accepts any subset of user fields in the request body.
+- Accepts any subset of user fields in the request body including `role`.
 - Password, if provided, is hashed before saving.
-- Returns the updated user data including related tasks.
+- Returns the updated user data including related tasks and the `role` field.
 
 ### DELETE
 
@@ -55,6 +57,7 @@ The User model includes personal information fields and relations to tasks and s
 - `email` (String): Unique email address.
 - `password` (String): Hashed password (never returned in responses).
 - `phoneNumber` (String, optional): User's phone number.
+- `role` (String): User's role in the system (`ADMIN` or `USER`).
 - `createdAt` (DateTime): Timestamp of user creation.
 - `updatedAt` (DateTime): Timestamp of last update.
 - Relations:
@@ -67,6 +70,7 @@ The User model includes personal information fields and relations to tasks and s
 - Returns appropriate HTTP status codes and error messages for:
   - Missing required fields.
   - Invalid user IDs.
+  - Invalid `role` values.
   - Server errors during database operations.
 
 ## Security Considerations
@@ -91,7 +95,7 @@ The User model includes personal information fields and relations to tasks and s
 ### GET users with pagination and selected fields
 
 ```
-GET /api/user?page=2&pageSize=5&firstName=true&email=true
+GET /api/user?page=2&pageSize=5&firstName=true&email=true&role=true
 ```
 
 ### POST create a new user
@@ -103,7 +107,8 @@ GET /api/user?page=2&pageSize=5&firstName=true&email=true
   "lastName": "Doe",
   "email": "john@example.com",
   "password": "securepassword123",
-  "phoneNumber": "123-456-7890"
+  "phoneNumber": "123-456-7890",
+  "role": "ADMIN"
 }
 ```
 
@@ -117,7 +122,8 @@ GET /api/user?page=2&pageSize=5&firstName=true&email=true
   "lastName": "Doe",
   "email": "john_new@example.com",
   "password": "newsecurepassword123",
-  "phoneNumber": "123-456-7890"
+  "phoneNumber": "123-456-7890",
+  "role": "USER"
 }
 ```
 
