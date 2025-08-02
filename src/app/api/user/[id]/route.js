@@ -11,6 +11,7 @@ export async function GET(request, { params }) {
     "lastName",
     "email",
     "phoneNumber",
+    "role",
     "createdAt",
     "updatedAt",
     "assignedTasks",
@@ -18,31 +19,29 @@ export async function GET(request, { params }) {
     "completedSubtasks",
   ];
   let select = {};
-  let hasQueryParams = false;
-  for (const fieldName of allFields) {
-    if (searchParams.has(fieldName)) {
-      select[fieldName] = true;
-      hasQueryParams = true;
-    }
-  }
-  if (!hasQueryParams) {
+
+  // Negative programming: if no query params, select all fields directly
+  if (![...searchParams.keys()].some((key) => allFields.includes(key)))
     select = allFields.reduce((accumulator, fieldName) => {
       accumulator[fieldName] = true;
       return accumulator;
     }, {});
-  }
+  else
+    for (const fieldName of allFields)
+      if (searchParams.has(fieldName)) select[fieldName] = true;
+
   const userId = typeof id === "string" ? parseInt(id, 10) : id;
-  if (!userId || isNaN(userId)) {
+  if (!userId || isNaN(userId))
     return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
-  }
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select,
     });
-    if (!user) {
+    if (!user)
       return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+
     return NextResponse.json(user, { status: 200 });
   } catch (error) {
     console.error(error);
