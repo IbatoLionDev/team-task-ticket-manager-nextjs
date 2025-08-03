@@ -12,6 +12,7 @@ This endpoint provides access to detailed information of a specific user identif
   - `assignedTasks`: Tasks assigned to the user.
   - `completedTasks`: Tasks completed by the user.
   - `completedSubtasks`: Subtasks completed by the user.
+- Includes the new `role` field indicating the user's role (`ADMIN` or `USER`).
 
 ## Managed Fields
 
@@ -21,6 +22,7 @@ This endpoint provides access to detailed information of a specific user identif
 - `lastName` (String): User's last name.
 - `email` (String): Unique email address.
 - `phoneNumber` (String, optional): User's phone number.
+- `role` (String): User's role in the system (`ADMIN` or `USER`).
 - `createdAt` (DateTime): Timestamp of user creation.
 - `updatedAt` (DateTime): Timestamp of last update.
 - Relations:

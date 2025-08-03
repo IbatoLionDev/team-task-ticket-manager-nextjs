@@ -2,35 +2,46 @@ import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 
+const validRoles = ["ADMIN", "USER"];
+
+function validateRole(role) {
+  if (!role) return "USER"; // default role
+  if (!validRoles.includes(role)) {
+    return null; // invalid role
+  }
+  return role;
+}
+
+const userSelectFields = {
+  id: true,
+  firstName: true,
+  username: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  role: true,
+  createdAt: true,
+  updatedAt: true,
+  assignedTasks: true,
+  completedTasks: true,
+  completedSubtasks: true,
+};
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const allFields = [
-      "id",
-      "firstName",
-      "username",
-      "lastName",
-      "email",
-      "phoneNumber",
-      "createdAt",
-      "updatedAt",
-      "assignedTasks",
-      "completedTasks",
-      "completedSubtasks",
-    ];
+    const allFields = Object.keys(userSelectFields);
     let select = {};
-    let hasQueryParams = false;
-    for (const fieldName of allFields) {
-      if (searchParams.has(fieldName)) {
-        select[fieldName] = true;
-        hasQueryParams = true;
+
+    // If no query params, select all fields directly
+    if (![...searchParams.keys()].some((key) => allFields.includes(key))) {
+      select = { ...userSelectFields };
+    } else {
+      for (const fieldName of allFields) {
+        if (searchParams.has(fieldName)) {
+          select[fieldName] = true;
+        }
       }
-    }
-    if (!hasQueryParams) {
-      select = allFields.reduce((accumulator, fieldName) => {
-        accumulator[fieldName] = true;
-        return accumulator;
-      }, {});
     }
     // Pagination logic: only apply if page or pageSize is present
     let skip, take;
@@ -61,14 +72,29 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const { firstName, username, lastName, email, password, phoneNumber } =
-      await request.json();
+    const {
+      firstName,
+      username,
+      lastName,
+      email,
+      password,
+      phoneNumber,
+      role,
+    } = await request.json();
 
     if (!firstName || !username || !lastName || !email || !password)
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
+
+    const userRole = validateRole(role);
+    if (userRole === null) {
+      return NextResponse.json(
+        { error: "Invalid role value" },
+        { status: 400 }
+      );
+    }
 
     const hashedPassword = await hash(password, 10); // hash password before saving
 
@@ -80,20 +106,9 @@ export async function POST(request) {
         email,
         password: hashedPassword,
         phoneNumber,
+        role: userRole,
       },
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
-        assignedTasks: true,
-        completedTasks: true,
-        completedSubtasks: true,
-      },
+      select: userSelectFields,
     });
 
     return NextResponse.json(newUser, { status: 201 });
@@ -108,8 +123,16 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
-    const { id, firstName, username, lastName, email, password, phoneNumber } =
-      await request.json();
+    const {
+      id,
+      firstName,
+      username,
+      lastName,
+      email,
+      password,
+      phoneNumber,
+      role,
+    } = await request.json();
 
     if (!id)
       return NextResponse.json({ error: "Missing user id" }, { status: 400 });
@@ -117,6 +140,14 @@ export async function PUT(request) {
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
     if (isNaN(idInt))
       return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+
+    const userRole = validateRole(role);
+    if (role && userRole === null) {
+      return NextResponse.json(
+        { error: "Invalid role value" },
+        { status: 400 }
+      );
+    }
 
     const dataToUpdate = {
       firstName,
@@ -126,23 +157,12 @@ export async function PUT(request) {
       phoneNumber,
     };
     if (password) dataToUpdate.password = await hash(password, 10);
+    if (userRole) dataToUpdate.role = userRole;
 
     const updatedUser = await prisma.user.update({
       where: { id: idInt },
       data: dataToUpdate,
-      select: {
-        id: true,
-        firstName: true,
-        username: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
-        assignedTasks: true,
-        completedTasks: true,
-        completedSubtasks: true,
-      },
+      select: userSelectFields,
     });
 
     return NextResponse.json(updatedUser, { status: 200 });

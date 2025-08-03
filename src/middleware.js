@@ -7,7 +7,15 @@ export async function middleware(request) {
   if (!token) return NextResponse.redirect(new URL("/sign-in", request.url));
 
   try {
-    await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(process.env.JWT_SECRET)
+    );
+    const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+    const isAdminUser = payload.role === "ADMIN";
+    if (isAdminRoute && !isAdminUser)
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+
     return NextResponse.next();
   } catch (error) {
     console.error("JWT verification failed:", error);
@@ -16,5 +24,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
 };
