@@ -6,7 +6,9 @@ import {
   ChevronsUpDown,
   CreditCard,
   CodeXml,
+  Shield,
 } from "lucide-react";
+import Link from "next/link";
 
 import { UserLogout } from "./user-logout";
 
@@ -27,12 +29,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useApiToken } from "@/hooks/useApiToken";
-import { API_BASE } from "@/lib/environments";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
 
-  const data = useApiToken(`${API_BASE}/user/auth`);
+  const data = useApiToken(`/api/user/auth`);
   const user = data?.user;
 
   return (
@@ -88,6 +89,16 @@ export function NavUser() {
                 <Bell />
                 Notifications
               </DropdownMenuItem>
+              {user?.role === "ADMIN" && (
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/admin"
+                    className="flex items-center text-rose-500">
+                    <Shield className="mr-2 h-4 w-4 text-rose-500" />
+                    <span className="text-rose-500">Admin</span>
+                  </Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <UserLogout />
