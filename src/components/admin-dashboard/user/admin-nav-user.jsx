@@ -1,6 +1,14 @@
 "use client";
 
-import { CreditCard, MoreVertical, LogOut, Bell, User } from "lucide-react";
+import {
+  CreditCard,
+  MoreVertical,
+  LogOut,
+  Bell,
+  User,
+  CodeXml,
+  Shield,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -18,9 +26,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useApiToken } from "@/hooks/useApiToken";
+import Link from "next/link";
 
-export function AdminNavUser({ user }) {
+export function AdminNavUser() {
   const { isMobile } = useSidebar();
+
+  const data = useApiToken(`/api/user/auth`);
+  const user = data?.user;
 
   return (
     <SidebarMenu>
@@ -31,13 +44,15 @@ export function AdminNavUser({ user }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage src={user?.avatar} alt={user?.username} />
+                <AvatarFallback className="rounded-lg">
+                  <CodeXml />
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user?.username}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                  {user?.email}
                 </span>
               </div>
               <MoreVertical className="ml-auto size-4" />
@@ -51,13 +66,15 @@ export function AdminNavUser({ user }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage src={user?.avatar} alt={user?.username} />
+                  <AvatarFallback className="rounded-lg">
+                    <CodeXml />
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{user?.name}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {user?.email}
                   </span>
                 </div>
               </div>
@@ -75,6 +92,14 @@ export function AdminNavUser({ user }) {
               <DropdownMenuItem>
                 <Bell />
                 Notifications
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center text-rose-500">
+                  <Shield className="mr-2 h-4 w-4 text-rose-500" />
+                  <span className="text-rose-500">Exit</span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

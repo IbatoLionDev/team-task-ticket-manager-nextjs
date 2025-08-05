@@ -28,11 +28,6 @@ import { AdminNavUser } from "./user/admin-nav-user";
 import { AdminNavSecondary } from "./secondary/admin-nav-secondary";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -149,7 +144,7 @@ export function AdminAppSidebar({ ...props }) {
         <AdminNavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <AdminNavUser user={data.user} />
+        <AdminNavUser />
       </SidebarFooter>
     </Sidebar>
   );
