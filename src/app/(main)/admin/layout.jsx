@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import PropTypes from "prop-types";
 import { DashboardBreadcrumbs } from "@/components/ui/dashboard-breadcrumbs";
 import { ModeToggle } from "@/components/theme/mode-toggle";
-import { AdminAppSidebar } from "@/components/admin-dashboard/admin-app-sidebar";
+import { AdminAppSidebar } from "@/components/dashboard/admin-dashboard/admin-app-sidebar";
 
 export default function DashboardLayout({ children }) {
   return (
