@@ -9,6 +9,7 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { UserLogout } from "./user-logout";
 
@@ -32,9 +33,12 @@ import { useApiToken } from "@/hooks/useApiToken";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
+  const pathname = usePathname();
 
   const data = useApiToken(`/api/user/auth`);
   const user = data?.user;
+
+  const isAdminRoute = pathname?.includes("/admin");
 
   return (
     <SidebarMenu>
@@ -95,7 +99,9 @@ export function NavUser() {
                     href="/admin"
                     className="flex items-center text-rose-500">
                     <Shield className="mr-2 h-4 w-4 text-rose-500" />
-                    <span className="text-rose-500">Admin</span>
+                    <span className="text-rose-500">
+                      {isAdminRoute ? "Exit" : "Admin"}
+                    </span>
                   </Link>
                 </DropdownMenuItem>
               )}
