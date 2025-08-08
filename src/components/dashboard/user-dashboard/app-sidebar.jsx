@@ -10,7 +10,7 @@ import {
 
 import { NavMain } from "@/components/dashboard/user-dashboard/platform/nav-main";
 import { NavProjects } from "@/components/dashboard/user-dashboard/projects/nav-projects";
-import { NavUser } from "@/components/dashboard/user-dashboard/user/nav-user";
+import { NavUser } from "../user-handler/nav-user";
 import { TeamSwitcher } from "@/components/dashboard/user-dashboard/team/team-switcher";
 import {
   Sidebar,

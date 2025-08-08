@@ -1,14 +1,17 @@
 "use client";
 
 import {
-  CreditCard,
-  MoreVertical,
-  LogOut,
+  BadgeCheck,
   Bell,
-  User,
+  ChevronsUpDown,
+  CreditCard,
   CodeXml,
   Shield,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { UserLogout } from "./user-logout";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -27,13 +30,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useApiToken } from "@/hooks/useApiToken";
-import Link from "next/link";
 
-export function AdminNavUser() {
+export function NavUser() {
   const { isMobile } = useSidebar();
+  const pathname = usePathname();
 
   const data = useApiToken(`/api/user/auth`);
   const user = data?.user;
+
+  const isAdminRoute = pathname?.includes("/admin");
 
   return (
     <SidebarMenu>
@@ -43,7 +48,7 @@ export function AdminNavUser() {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user?.avatar} alt={user?.username} />
                 <AvatarFallback className="rounded-lg">
                   <CodeXml />
@@ -51,11 +56,9 @@ export function AdminNavUser() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user?.username}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user?.email}
-                </span>
+                <span className="truncate text-xs">{user?.email}</span>
               </div>
-              <MoreVertical className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -72,17 +75,14 @@ export function AdminNavUser() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user?.name}</span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {user?.email}
-                  </span>
+                  <span className="truncate font-medium">{user?.username}</span>
+                  <span className="truncate text-xs">{user?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <User />
+                <BadgeCheck />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
@@ -93,20 +93,21 @@ export function AdminNavUser() {
                 <Bell />
                 Notifications
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/dashboard"
-                  className="flex items-center text-rose-500">
-                  <Shield className="mr-2 h-4 w-4 text-rose-500" />
-                  <span className="text-rose-500">Exit</span>
-                </Link>
-              </DropdownMenuItem>
+              {user?.role === "ADMIN" && (
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={isAdminRoute ? "/dashboard" : "/admin"}
+                    className="flex items-center text-rose-500">
+                    <Shield className="mr-2 h-4 w-4 text-rose-500" />
+                    <span className="text-rose-500">
+                      {isAdminRoute ? "Exit" : "Admin"}
+                    </span>
+                  </Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
+            <UserLogout />
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

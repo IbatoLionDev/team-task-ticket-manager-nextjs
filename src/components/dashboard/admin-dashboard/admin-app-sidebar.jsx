@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { AdminNavMain } from "./platform/admin-nav-main";
-import { AdminNavUser } from "./user/admin-nav-user";
 import { AdminNavSecondary } from "./secondary/admin-nav-secondary";
+import { NavUser } from "../user-handler/nav-user";
 
 const data = {
   navMain: [
@@ -144,7 +144,7 @@ export function AdminAppSidebar({ ...props }) {
         <AdminNavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <AdminNavUser />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );
