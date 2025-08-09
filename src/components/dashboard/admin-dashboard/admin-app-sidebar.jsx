@@ -31,12 +31,12 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/admin",
       icon: LayoutDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
+      title: "Tasks",
+      url: "/admin/tasks",
       icon: List,
     },
     {
@@ -46,61 +46,13 @@ const data = {
     },
     {
       title: "Projects",
-      url: "#",
+      url: "/admin/projects",
       icon: Folder,
     },
     {
-      title: "Team",
-      url: "#",
+      title: "Users",
+      url: "/admin/users",
       icon: Users,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: Camera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: FileText,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: Sparkles,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
     },
   ],
   navSecondary: [
@@ -133,7 +85,9 @@ export function AdminAppSidebar({ ...props }) {
               className="data-[slot=sidebar-menu-button]:!p-1.5">
               <Link href="#">
                 <div className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">
+                  LionProyectsFlow
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
