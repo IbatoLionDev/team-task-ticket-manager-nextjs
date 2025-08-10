@@ -1,11 +1,8 @@
 "use client";
 
 import {
-  Camera,
   BarChart,
   LayoutDashboard,
-  Sparkles,
-  FileText,
   Folder,
   HelpCircle,
   List,
@@ -83,7 +80,7 @@ export function AdminAppSidebar({ ...props }) {
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <Link href="#">
+              <Link href="/admin">
                 <div className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
                 <span className="text-base font-semibold">
                   LionProyectsFlow
