@@ -11,42 +11,38 @@ import {
 import React from "react";
 import Link from "next/link";
 
-function getDashboardBreadcrumbs(pathname) {
+const getBreadcrumbs = (pathname) => {
   const segments = pathname
     .replace(/(^\/+)|(\/+$)/g, "")
     .split("/")
     .filter(Boolean);
-  const dashboardIndex = segments.indexOf("dashboard");
-  const crumbs =
-    dashboardIndex >= 0 ? segments.slice(dashboardIndex) : segments;
+  const baseIndex = segments.findIndex(
+    (segment) => segment === "dashboard" || segment === "admin"
+  );
+  const relevantSegments =
+    baseIndex >= 0 ? segments.slice(baseIndex) : segments;
 
-  function isDynamicSegment(segment) {
-    // Check if segment is a number (id)
-    return /^\d+$/.test(segment);
-  }
-
-  return crumbs.map((segment, idx) => {
-    const href = "/" + segments.slice(0, dashboardIndex + idx + 1).join("/");
-    const isLast = idx === crumbs.length - 1;
-    const label = isDynamicSegment(segment)
+  return relevantSegments.map((segment, index) => {
+    const href = `/${segments
+      .slice(0, (baseIndex >= 0 ? baseIndex : 0) + index + 1)
+      .join("/")}`;
+    const isLast = index === relevantSegments.length - 1;
+    const label = /^\d+$/.test(segment)
       ? "Id"
       : segment.charAt(0).toUpperCase() + segment.slice(1);
-    return {
-      key: href,
-      label,
-      href,
-      isLast,
-    };
+    return { key: href, label, href, isLast };
   });
-}
+};
 
-export function DashboardBreadcrumbs() {
+export const DashboardBreadcrumbs = () => {
   const pathname = usePathname();
-  const crumbs = getDashboardBreadcrumbs(pathname);
+  const breadcrumbs = getBreadcrumbs(pathname);
+  if (breadcrumbs.length <= 1) return null;
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {crumbs.map(({ key, label, href, isLast }) => (
+        {breadcrumbs.map(({ key, label, href, isLast }) => (
           <React.Fragment key={key}>
             <BreadcrumbItem className={isLast ? undefined : "hidden md:block"}>
               {isLast ? (
@@ -63,4 +59,4 @@ export function DashboardBreadcrumbs() {
       </BreadcrumbList>
     </Breadcrumb>
   );
-}
+};
