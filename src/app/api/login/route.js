@@ -17,6 +17,13 @@ export async function POST(request) {
       where: {
         OR: [{ email: identifier }, { username: identifier }],
       },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        role: true,
+        password: true,
+      },
     });
 
     if (!user)
@@ -35,6 +42,7 @@ export async function POST(request) {
         id: user.id,
         email: user.email,
         username: user.username,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
