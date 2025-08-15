@@ -3,20 +3,29 @@ import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export async function POST(request) {
+const MAX_AGE_SECONDS = 60 * 60 * 24 * 30,
+  JWT_EXPIRES = "30d";
+const jsonError = (m, s = 400) =>
+  NextResponse.json({ error: m }, { status: s });
+const buildCookie = (t) =>
+  `token=${t}; Path=/; HttpOnly; Max-Age=${MAX_AGE_SECONDS}; SameSite=Lax; Secure`;
+const tokenPayload = (u) => ({
+  id: u.id,
+  email: u.email,
+  username: u.username,
+  role: u.role,
+});
+
+export const POST = async (request) => {
   try {
     const { identifier, password } = await request.json();
-
     if (!identifier || !password)
-      return NextResponse.json(
-        { error: "Missing identifier or password" },
-        { status: 400 }
-      );
-
+      return jsonError("Missing identifier or password", 400);
+    const secret = process.env.JWT_SECRET;
+    if (!secret)
+      return jsonError("Server misconfiguration: missing JWT secret", 500);
     const user = await prisma.user.findFirst({
-      where: {
-        OR: [{ email: identifier }, { username: identifier }],
-      },
+      where: { OR: [{ email: identifier }, { username: identifier }] },
       select: {
         id: true,
         email: true,
@@ -25,42 +34,17 @@ export async function POST(request) {
         password: true,
       },
     });
-
-    if (!user)
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
-
-    const passwordIsValid = await compare(password, user.password);
-
-    if (!passwordIsValid)
-      return NextResponse.json(
-        { error: "Incorrect password" },
-        { status: 401 }
-      );
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "30d" }
-    );
-
-    const cookie = `token=${token}; Path=/; HttpOnly; Max-Age=${
-      60 * 60 * 24 * 30
-    }; SameSite=Lax; Secure`;
-
-    const response = NextResponse.json({ message: "Login successful" });
-    response.headers.set("Set-Cookie", cookie);
-
-    return response;
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Login failed due to server error" },
-      { status: 500 }
-    );
+    if (!user) return jsonError("User not found", 401);
+    if (!(await compare(password, user.password)))
+      return jsonError("Incorrect password", 401);
+    const token = jwt.sign(tokenPayload(user), secret, {
+      expiresIn: JWT_EXPIRES,
+    });
+    const res = NextResponse.json({ message: "Login successful" });
+    res.headers.set("Set-Cookie", buildCookie(token));
+    return res;
+  } catch (e) {
+    console.error(e);
+    return jsonError("Login failed due to server error", 500);
   }
-}
+};
