@@ -1,53 +1,35 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { jsonError, buildSelect, safeParseId } from "@/helpers/apiHelpers";
 
-export async function GET(request, { params }) {
-  const { id } = params;
-  const { searchParams } = new URL(request.url);
-  const allFields = [
-    "id",
-    "firstName",
-    "username",
-    "lastName",
-    "email",
-    "phoneNumber",
-    "role",
-    "createdAt",
-    "updatedAt",
-    "assignedTasks",
-    "completedTasks",
-    "completedSubtasks",
-  ];
-  let select = {};
-
-  // Negative programming: if no query params, select all fields directly
-  if (![...searchParams.keys()].some((key) => allFields.includes(key)))
-    select = allFields.reduce((accumulator, fieldName) => {
-      accumulator[fieldName] = true;
-      return accumulator;
-    }, {});
-  else
-    for (const fieldName of allFields)
-      if (searchParams.has(fieldName)) select[fieldName] = true;
-
-  const userId = typeof id === "string" ? parseInt(id, 10) : id;
-  if (!userId || isNaN(userId))
-    return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
-
+export const GET = async (request, { params }) => {
+  const userId = safeParseId(params.id);
+  if (!userId) return jsonError("Invalid user id", 400);
   try {
+    const { searchParams } = new URL(request.url);
+    const allFields = [
+      "id",
+      "firstName",
+      "username",
+      "lastName",
+      "email",
+      "phoneNumber",
+      "role",
+      "createdAt",
+      "updatedAt",
+      "assignedTasks",
+      "completedTasks",
+      "completedSubtasks",
+    ];
+    const select = buildSelect(allFields, searchParams);
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select,
     });
-    if (!user)
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-
+    if (!user) return jsonError("User not found", 404);
     return NextResponse.json(user, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch user" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to fetch user", 500);
   }
-}
+};
