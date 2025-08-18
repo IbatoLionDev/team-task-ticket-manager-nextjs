@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { jsonError, buildSelect, parsePagination } from "@/helpers/apiHelpers";
 
 // GET all subtasks
-export async function GET(request) {
+export const GET = async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const allFields = [
@@ -16,59 +17,27 @@ export async function GET(request) {
       "updatedAt",
       "finishedAt",
     ];
-    let select = {};
-    let hasQueryParams = false;
-    for (const fieldName of allFields) {
-      if (searchParams.has(fieldName)) {
-        select[fieldName] = true;
-        hasQueryParams = true;
-      }
-    }
-    if (!hasQueryParams) {
-      select = allFields.reduce((accumulator, fieldName) => {
-        accumulator[fieldName] = true;
-        return accumulator;
-      }, {});
-    }
-    // Pagination logic: only apply if page or pageSize is present
-    let skip, take;
-    const hasPage = searchParams.has("page");
-    const hasPageSize = searchParams.has("pageSize");
-    if (hasPage || hasPageSize) {
-      const page = parseInt(searchParams.get("page"), 10) || 1;
-      const pageSize = parseInt(searchParams.get("pageSize"), 10) || 10;
-      if (page > 0 && pageSize > 0) {
-        skip = (page - 1) * pageSize;
-        take = pageSize;
-      }
-    }
+    const select = buildSelect(allFields, searchParams);
+    const { skip, take } = parsePagination(searchParams);
     const subtasks = await prisma.subtask.findMany({
       select,
-      ...(typeof skip !== "undefined" ? { skip } : {}),
-      ...(typeof take !== "undefined" ? { take } : {}),
+      ...(skip ? { skip } : {}),
+      ...(take ? { take } : {}),
     });
     return NextResponse.json(subtasks, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch subtasks" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to fetch subtasks", 500);
   }
-}
+};
 
 // POST create a new subtask
-export async function POST(request) {
+export const POST = async (request) => {
   try {
     const { taskId, title, description, status, finishedAt } =
       await request.json();
-
     if (!taskId || !title || !description)
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-
+      return jsonError("Missing required fields", 400);
     const newSubtask = await prisma.subtask.create({
       data: {
         taskId,
@@ -77,130 +46,69 @@ export async function POST(request) {
         status: status ?? "PENDING",
         finishedAt,
       },
-      include: {
-        task: true,
-      },
+      include: { task: true },
     });
-
     return NextResponse.json(newSubtask, { status: 201 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to create subtask" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to create subtask", 500);
   }
-}
+};
 
 // PUT update a subtask (full update)
-export async function PUT(request) {
+export const PUT = async (request) => {
   try {
     const { id, taskId, title, description, status, finishedAt } =
       await request.json();
-
-    if (!id)
-      return NextResponse.json(
-        { error: "Missing subtask id" },
-        { status: 400 }
-      );
-
+    if (!id) return jsonError("Missing subtask id", 400);
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
-    if (isNaN(idInt))
-      return NextResponse.json(
-        { error: "Invalid subtask id" },
-        { status: 400 }
-      );
-
+    if (isNaN(idInt)) return jsonError("Invalid subtask id", 400);
     const updatedSubtask = await prisma.subtask.update({
       where: { id: idInt },
-      data: {
-        taskId,
-        title,
-        description,
-        status,
-        finishedAt,
-      },
-      include: {
-        task: true,
-      },
+      data: { taskId, title, description, status, finishedAt },
+      include: { task: true },
     });
-
     return NextResponse.json(updatedSubtask, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to update subtask" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to update subtask", 500);
   }
-}
+};
 
 // PATCH update a subtask (partial update)
-export async function PATCH(request) {
+export const PATCH = async (request) => {
   try {
     const { id, ...data } = await request.json();
-
-    if (!id)
-      return NextResponse.json(
-        { error: "Missing subtask id" },
-        { status: 400 }
-      );
-
+    if (!id) return jsonError("Missing subtask id", 400);
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
-    if (isNaN(idInt))
-      return NextResponse.json(
-        { error: "Invalid subtask id" },
-        { status: 400 }
-      );
-
+    if (isNaN(idInt)) return jsonError("Invalid subtask id", 400);
     const updatedSubtask = await prisma.subtask.update({
       where: { id: idInt },
       data,
-      include: {
-        task: true,
-      },
+      include: { task: true },
     });
-
     return NextResponse.json(updatedSubtask, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to patch subtask" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to patch subtask", 500);
   }
-}
+};
 
 // DELETE a subtask
-export async function DELETE(request) {
+export const DELETE = async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-
-    if (!id)
-      return NextResponse.json(
-        { error: "Missing subtask id" },
-        { status: 400 }
-      );
-
+    if (!id) return jsonError("Missing subtask id", 400);
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
-    if (isNaN(idInt))
-      return NextResponse.json(
-        { error: "Invalid subtask id" },
-        { status: 400 }
-      );
-
+    if (isNaN(idInt)) return jsonError("Invalid subtask id", 400);
     await prisma.subtask.delete({ where: { id: idInt } });
-
     return NextResponse.json(
       { message: "Subtask deleted successfully" },
       { status: 200 }
     );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to delete subtask" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to delete subtask", 500);
   }
-}
+};

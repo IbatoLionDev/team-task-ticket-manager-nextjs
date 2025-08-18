@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { jsonError, buildSelect, parsePagination } from "@/helpers/apiHelpers";
 
 // GET all projects
-export async function GET(request) {
+export const GET = async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const allFields = [
@@ -18,49 +19,22 @@ export async function GET(request) {
       "finishedAt",
       "tasks",
     ];
-    let select = {};
-    let hasQueryParams = false;
-    for (const fieldName of allFields) {
-      if (searchParams.has(fieldName)) {
-        select[fieldName] = true;
-        hasQueryParams = true;
-      }
-    }
-    if (!hasQueryParams) {
-      select = allFields.reduce((accumulator, fieldName) => {
-        accumulator[fieldName] = true;
-        return accumulator;
-      }, {});
-    }
-    // Pagination logic: only apply if page or pageSize is present
-    let skip, take;
-    const hasPage = searchParams.has("page");
-    const hasPageSize = searchParams.has("pageSize");
-    if (hasPage || hasPageSize) {
-      const page = parseInt(searchParams.get("page"), 10) || 1;
-      const pageSize = parseInt(searchParams.get("pageSize"), 10) || 10;
-      if (page > 0 && pageSize > 0) {
-        skip = (page - 1) * pageSize;
-        take = pageSize;
-      }
-    }
+    const select = buildSelect(allFields, searchParams);
+    const { skip, take } = parsePagination(searchParams);
     const projects = await prisma.project.findMany({
       select,
-      ...(typeof skip !== "undefined" ? { skip } : {}),
-      ...(typeof take !== "undefined" ? { take } : {}),
+      ...(skip ? { skip } : {}),
+      ...(take ? { take } : {}),
     });
     return NextResponse.json(projects, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch projects" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to fetch projects", 500);
   }
-}
+};
 
 // POST create a new project
-export async function POST(request) {
+export const POST = async (request) => {
   try {
     const {
       title,
@@ -73,7 +47,6 @@ export async function POST(request) {
       finishedAt,
       tasks,
     } = await request.json();
-
     if (
       !title ||
       !description ||
@@ -82,11 +55,7 @@ export async function POST(request) {
       !urgency ||
       expectedPayment === undefined
     )
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-
+      return jsonError("Missing required fields", 400);
     const newProject = await prisma.project.create({
       data: {
         title,
@@ -99,23 +68,17 @@ export async function POST(request) {
         finishedAt,
         tasks: tasks ? { create: tasks } : undefined,
       },
-      include: {
-        tasks: true,
-      },
+      include: { tasks: true },
     });
-
     return NextResponse.json(newProject, { status: 201 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to create project" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to create project", 500);
   }
-}
+};
 
 // PUT update a project (full update)
-export async function PUT(request) {
+export const PUT = async (request) => {
   try {
     const {
       id,
@@ -128,20 +91,9 @@ export async function PUT(request) {
       startDate,
       finishedAt,
     } = await request.json();
-
-    if (!id)
-      return NextResponse.json(
-        { error: "Missing project id" },
-        { status: 400 }
-      );
-
+    if (!id) return jsonError("Missing project id", 400);
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
-    if (isNaN(idInt))
-      return NextResponse.json(
-        { error: "Invalid project id" },
-        { status: 400 }
-      );
-
+    if (isNaN(idInt)) return jsonError("Invalid project id", 400);
     const updatedProject = await prisma.project.update({
       where: { id: idInt },
       data: {
@@ -154,87 +106,49 @@ export async function PUT(request) {
         startDate,
         finishedAt,
       },
-      include: {
-        tasks: true,
-      },
+      include: { tasks: true },
     });
-
     return NextResponse.json(updatedProject, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to update project" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to update project", 500);
   }
-}
+};
 
 // PATCH update a project (partial update)
-export async function PATCH(request) {
+export const PATCH = async (request) => {
   try {
     const { id, ...data } = await request.json();
-
-    if (!id)
-      return NextResponse.json(
-        { error: "Missing project id" },
-        { status: 400 }
-      );
-
+    if (!id) return jsonError("Missing project id", 400);
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
-    if (isNaN(idInt))
-      return NextResponse.json(
-        { error: "Invalid project id" },
-        { status: 400 }
-      );
-
+    if (isNaN(idInt)) return jsonError("Invalid project id", 400);
     const updatedProject = await prisma.project.update({
       where: { id: idInt },
       data,
-      include: {
-        tasks: true,
-      },
+      include: { tasks: true },
     });
-
     return NextResponse.json(updatedProject, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to patch project" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to patch project", 500);
   }
-}
+};
 
 // DELETE a project
-export async function DELETE(request) {
+export const DELETE = async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-
-    if (!id)
-      return NextResponse.json(
-        { error: "Missing project id" },
-        { status: 400 }
-      );
-
+    if (!id) return jsonError("Missing project id", 400);
     const idInt = typeof id === "string" ? parseInt(id, 10) : id;
-    if (isNaN(idInt))
-      return NextResponse.json(
-        { error: "Invalid project id" },
-        { status: 400 }
-      );
-
+    if (isNaN(idInt)) return jsonError("Invalid project id", 400);
     await prisma.project.delete({ where: { id: idInt } });
-
     return NextResponse.json(
       { message: "Project deleted successfully" },
       { status: 200 }
     );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to delete project" },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error(e);
+    return jsonError("Failed to delete project", 500);
   }
-}
+};
